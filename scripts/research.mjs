@@ -4,6 +4,7 @@
 import { readFile, writeFile } from "node:fs/promises";
 import { pathToFileURL } from "node:url";
 import path from "node:path";
+import { spawnSync } from "node:child_process";
 
 const DIR = process.env.PIVO_DIR || process.cwd();
 const API = (process.env.ANTHROPIC_BASE_URL || "https://api.anthropic.com") + "/v1/messages";
@@ -130,6 +131,24 @@ export function snapTaps(drafts) {
   }
   return o;
 }
+// ------------------------------------------------------------------ spine.csv (foglio "Spine" della tabella Google)
+// La tabella lo legge con =IMPORTDATA(".../spine.csv"): solo da guardare, i prezzi si cambiano su YHOP.
+const csvCell = (v) => { const t = String(v == null ? "" : v); return /[",\n;]/.test(t) ? '"' + t.replace(/"/g, '""') + '"' : t; };
+export function spineCSV(drafts) {
+  const rows = drafts.filter(d => d && d.identifier != null && clean(d.name))
+    .sort((a, b) => (parseFloat(a.identifier) - parseFloat(b.identifier)) || String(a.identifier).localeCompare(String(b.identifier)))
+    .map(d => [clean(d.identifier), clean(d.name), clean(d.brewery), clean(d.style), fmtAbv(d.abv), fmtPrices(d.glasses)]);
+  return [["SPINA", "BIRRA", "BIRRIFICIO", "STILE", "ABV", "PREZZI (da YHOP)"], ...rows].map(r => r.map(csvCell).join(",")).join("\n") + "\n";
+}
+async function saveSpine(drafts, log) {
+  const file = path.join(DIR, "spine.csv"), text = spineCSV(drafts);
+  let old = ""; try { old = await readFile(file, "utf8"); } catch {}
+  if (old === text) return;
+  await writeFile(file, text);
+  log("spine.csv aggiornato");
+  if (process.env.GITHUB_ACTIONS) spawnSync("git", ["add", "spine.csv"], { cwd: DIR });   // salvato insieme al resto
+}
+
 const T = {
   tr: { title: "PIVO · musluk değişikliği", newTap: (t, b) => `Musluk ${t}: ${b}`, changed: (t, a, b) => `Musluk ${t}: ${a} → ${b}`,
         removed: (t, a) => `Musluk ${t}: ${a} kaldırıldı`, price: (t, n, a, b) => `Musluk ${t} ${n}: fiyat ${a} → ${b}`,
@@ -178,6 +197,7 @@ export async function run({ log = console.log } = {}) {
 
   // avvisi: confronta con l'ultima lista vista
   const tapsNow = snapTaps(drafts);
+  if (drafts.length) await saveSpine(drafts, log);
   const tapsBefore = await readJSON("taps.json", null);
   if (!drafts.length) {
     log("YHOP ha risposto con una lista vuota: nessun confronto (probabile errore temporaneo).");
