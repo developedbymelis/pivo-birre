@@ -1,0 +1,38 @@
+{
+  "updated": "2026-10-24T13:29:08.419Z",
+  "source": "ESPN",
+  "list": [
+    {
+      "home": "Atalanta",
+      "away": "Frosinone",
+      "date": "2026-10-25",
+      "time": "15:00",
+      "competition": "Serie A",
+      "priority": true
+    },
+    {
+      "home": "Fiorentina",
+      "away": "Atalanta",
+      "date": "2026-10-29",
+      "time": "20:45",
+      "competition": "Serie A",
+      "priority": true
+    },
+    {
+      "home": "Atalanta",
+      "away": "Parma",
+      "date": "2026-11-02",
+      "time": "20:45",
+      "competition": "Serie A",
+      "priority": true
+    },
+    {
+      "home": "Monza",
+      "away": "Atalanta",
+      "date": "2026-11-08",
+      "time": "15:00",
+      "competition": "Serie A",
+      "priority": true
+    }
+  ]
+}
