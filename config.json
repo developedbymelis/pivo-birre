@@ -1,6 +1,6 @@
 {
   "_help": "PIVO robot — impostazioni. skip_ids = birre che hanno già una scheda scritta a mano nelle pagine (non serve ricercarle).",
-  "notify_lang": "tr",
+  "notify_lang": "it",
   "menu_url": "https://pivobirreria.netlify.app/menu",
   "yhop_url": "https://api-core.yhop.beer/v2/beerlover/pubs/218/taplist/cast",
   "model": "claude-sonnet-5-5",
