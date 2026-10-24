@@ -1,0 +1,62 @@
+name: PIVO robot birre
+
+on:
+  schedule:
+    - cron: "*/15 * * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: pivo-robot
+  cancel-in-progress: false
+
+jobs:
+  robot:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Controlla YHOP, prepara gli avvisi, ricerca le birre nuove
+        run: node scripts/research.mjs
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+
+      - name: Partite (Atalanta)
+        run: node scripts/fixtures.mjs
+        env:
+          FOOTBALL_DATA_TOKEN: ${{ secrets.FOOTBALL_DATA_TOKEN }}
+
+      - name: C'è una birra nuova?
+        id: check
+        run: |
+          node -e "const f='outbox.json',fs=require('fs');const n=fs.existsSync(f)?(JSON.parse(fs.readFileSync(f)).newTaps||[]).length:0;console.log('nuove: '+n);fs.appendFileSync(process.env.GITHUB_OUTPUT,'new='+(n>0)+'\n')"
+
+      - name: Story Instagram animate per le birre nuove
+        if: steps.check.outputs.new == 'true'
+        run: |
+          npm install --no-save --no-audit --no-fund playwright@1.48.2
+          npx playwright install --with-deps chromium
+          which ffmpeg || (sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg)
+          node scripts/story.mjs
+
+      - name: Salva le novità
+        if: always()
+        run: |
+          git config user.name "pivo-robot"
+          git config user.email "pivo-robot@users.noreply.github.com"
+          for f in profiles.json status.json taps.json matches.json stories; do if [ -e "$f" ]; then git add "$f"; fi; done
+          if git diff --cached --quiet; then echo "Nessuna novità."; exit 0; fi
+          git commit -m "PIVO: aggiornamento automatico"
+          git push
+
+      - name: Invia gli avvisi al telefono
+        if: always()
+        run: node scripts/notify.mjs
+        env:
+          NTFY_TOPIC: ${{ secrets.NTFY_TOPIC }}
