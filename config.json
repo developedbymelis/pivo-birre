@@ -1,0 +1,105 @@
+{
+  "_help": "PIVO robot — impostazioni. skip_ids = birre che hanno già una scheda scritta a mano nelle pagine (non serve ricercarle).",
+  "notify_lang": "tr",
+  "menu_url": "https://pivobirreria.netlify.app/menu",
+  "yhop_url": "https://api-core.yhop.beer/v2/beerlover/pubs/218/taplist/cast",
+  "model": "claude-sonnet-5-5",
+  "web_search_tool": "web_search_20250305",
+  "max_searches_per_beer": 3,
+  "max_new_per_run": 3,
+  "max_attempts": 3,
+  "skip_ids": [
+    38203,
+    58210,
+    58265,
+    66158,
+    76719,
+    88044,
+    95979,
+    97127,
+    97128,
+    97187
+  ],
+  "pairing_groups": [
+    {
+      "chip": 0,
+      "name": "Pilsner",
+      "foods": [
+        "Patatine Super Croccanti",
+        "Anelli di Cipolla",
+        "Croquetas de Jamón"
+      ]
+    },
+    {
+      "chip": 1,
+      "name": "Gose",
+      "foods": [
+        "Acciughe in Tempura",
+        "Gamberi Panati",
+        "Patatine Cacio & Pepe"
+      ]
+    },
+    {
+      "chip": 2,
+      "name": "Belgian Blond Ale",
+      "foods": [
+        "Felafel",
+        "Alette di Pollo",
+        "Peperoni ripieni"
+      ]
+    },
+    {
+      "chip": 3,
+      "name": "IPA",
+      "foods": [
+        "Pastrami",
+        "Pizza Napoli",
+        "Olive all'Ascolana"
+      ]
+    },
+    {
+      "chip": 4,
+      "name": "Imperial Stout",
+      "foods": [
+        "Tortino al cioccolato",
+        "Tiramisù con savoiardi",
+        "Supercheeses"
+      ]
+    },
+    {
+      "chip": 5,
+      "name": "Märzen",
+      "foods": [
+        "Pizza Autunno Bruno",
+        "Il Castagnaro",
+        "Burrito Pulled Pork"
+      ]
+    },
+    {
+      "chip": 6,
+      "name": "Saison",
+      "foods": [
+        "Gustoso",
+        "Crudo & Grana",
+        "Speck, Brie & Porcini"
+      ]
+    },
+    {
+      "chip": 7,
+      "name": "Stout / Porter",
+      "foods": [
+        "Pivo Club Sandwich",
+        "Croquetas de Jamón",
+        "Il Castagnaro"
+      ]
+    }
+  ],
+  "teams": [
+    {
+      "name": "Atalanta",
+      "football_data_id": 102,
+      "espn_id": 105
+    }
+  ],
+  "_help_teams": "Squadre di cui mostrare le partite. Per aggiungerne una servono gli ID di football-data.org e/o ESPN."
+}

@@ -1,0 +1,1559 @@
+<!DOCTYPE html>
+<html lang="it"><head><meta charset="utf-8"><title>PIVO story</title>
+<style>
+@font-face{font-family:'Bebas Neue';src:url('fonts/BebasNeue-Regular.ttf')}
+@font-face{font-family:'Rubik';font-weight:300 900;src:url('fonts/Rubik-wght.ttf')}
+@font-face{font-family:'Rubik';font-style:italic;font-weight:300 900;src:url('fonts/Rubik-Italic-wght.ttf')}
+:root{--cream:#FFFDF4;--ink:#0B1012;--ink2:#141B1E;--teal:#2FBFA8;--red:#F5263A;--amber:#FF9E1B;--honey:#FFC24B;
+  --disp:'Bebas Neue',sans-serif;--body:'Rubik',sans-serif}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{width:1080px;height:1920px;background:var(--ink);overflow:hidden}
+#st{position:relative;width:1080px;height:1920px;color:var(--cream);font-family:var(--body);overflow:hidden;background:var(--ink)}
+.glow{position:absolute;left:0;top:0;width:1080px;height:1920px;
+  background:radial-gradient(ellipse 760px 900px at 540px 760px, color-mix(in srgb, var(--acc) 26%, transparent), transparent 70%)}
+.word,.sub,.flag .no,.flag .pill,.glass,.name,.meta>div,.pr,.handle{will-change:transform,opacity}
+.ring{position:absolute;border-radius:50%;border:6px dashed var(--cream);opacity:.07}
+.ring.a{width:980px;height:980px;left:-470px;top:1240px}.ring.b{width:560px;height:560px;left:760px;top:-200px}
+.top{position:absolute;left:0;right:0;top:170px;text-align:center}
+.word{font-family:var(--disp);font-size:118px;line-height:1;letter-spacing:.22em;padding-left:.22em;
+  text-shadow:-6px 0 0 var(--teal),6px 0 0 var(--red)}
+.sub{display:flex;justify-content:center;align-items:center;gap:16px;margin-top:14px;font:800 24px/1 var(--body);letter-spacing:.32em;opacity:.72}
+.sub i{width:12px;height:12px;border-radius:50%;display:block}
+.flag{position:absolute;left:0;right:0;top:366px;display:flex;justify-content:center;align-items:center;gap:18px}
+.flag .no{width:78px;height:78px;border-radius:50%;border:6px solid var(--acc);color:var(--acc);display:flex;align-items:center;
+  justify-content:center;font-family:var(--disp);font-size:50px;padding-top:6px}
+.flag .pill{display:inline-block;background:var(--red);color:var(--cream);border-radius:999px;padding:14px 26px 12px;font:800 28px/1 var(--body);letter-spacing:.18em}
+.glass{position:absolute;left:428px;top:470px;width:224px;height:624px;transform-origin:50% 100%}
+.glass svg{width:100%;height:100%;overflow:visible;filter:drop-shadow(0 30px 34px rgba(0,0,0,.55))}
+.gbub{opacity:.5}
+.name{position:absolute;left:70px;right:70px;top:1110px;height:250px;display:flex;align-items:flex-end;justify-content:center;
+  text-align:center;font-family:var(--disp);line-height:.88;text-transform:uppercase;letter-spacing:.01em}
+.meta{position:absolute;left:60px;right:60px;top:1386px;text-align:center}
+.brew{font:800 27px/1.1 var(--body);letter-spacing:.24em;text-transform:uppercase;opacity:.72}
+.style{font:500 40px/1.2 var(--body);margin-top:12px}.style b{font-weight:800;color:var(--acc)}
+.key{font:italic 500 32px/1.25 var(--body);opacity:.72;margin-top:12px}
+.prices{position:absolute;left:150px;right:150px;top:1590px;display:flex;justify-content:center;gap:56px;
+  border-top:4px dotted rgba(255,253,244,.22);padding-top:20px}
+.pr{text-align:center}.pr small{display:block;font:800 22px/1 var(--body);letter-spacing:.14em;opacity:.62;text-transform:uppercase}
+.pr b{display:block;font-family:var(--disp);font-weight:400;font-size:84px;line-height:1;margin-top:8px}
+.handle{position:absolute;left:0;right:0;top:1748px;text-align:center;font:800 22px/1 var(--body);letter-spacing:.24em;opacity:.55}
+</style></head>
+<body><div id="st"></div>
+<script>
+var window_=window;
+/* ============================================================================
+   PIVO LIVE — birre alla spina lette in automatico da YHOP.
+   Questo blocco è IDENTICO nel menu e nel TV.
+
+   DA DOVE ARRIVA COSA
+   · YHOP (automatico): numero spina, nome, birrificio, stile, ABV, formati, PREZZI.
+   · PIVO_BEERS (qui sotto): note IT/EN, amarezza/corpo/aroma, bicchiere, colori,
+     abbinamento, parola chiave TV. Collegati all'ID YHOP della birra (beer_id),
+     MAI al numero della spina: se una birra cambia spina, la sua scheda la segue;
+     se arriva una birra nuova, non eredita nulla dalla precedente.
+   · SCHEDE AI (robot GitHub, PROFILES_URL): per le birre senza scheda PIVO un
+     robot ricerca la birra sul web con Claude e pubblica note, valori, bicchiere,
+     colori e gruppo di abbinamento. Mai nome, stile, ABV o prezzi.
+   · PIVO_STYLE_RULES: se non c'è né scheda PIVO né scheda AI, l'aspetto viene
+     scelto dallo stile YHOP (IPA, Stout, Gose…). Le note così sono generiche.
+   Priorità: scheda PIVO  >  scheda AI  >  regola di stile.
+   · I prezzi arrivano SOLO da YHOP. Se YHOP non ha prezzi, non se ne mostra nessuno.
+
+   SE YHOP NON RISPONDE
+   1) ultima lista letta con successo su questo dispositivo;
+   2) altrimenti PIVO_SNAPSHOT (lista incorporata qui sotto).
+
+   AGGIUNGERE UNA SCHEDA: copiare una voce di PIVO_BEERS, usare come chiave il
+   beer_id YHOP (visibile in https://api-core.yhop.beer/v2/beerlover/pubs/218/taplist/cast).
+   Test: ?yhop=off simula YHOP irraggiungibile.
+   ========================================================================== */
+(function(){
+"use strict";
+var YHOP_URL="https://api-core.yhop.beer/v2/beerlover/pubs/218/taplist/cast";
+var CACHE_KEY="pivo-yhop-taps-v1";
+var PROFILES_URL="";       /* vuoto = schede AI disattivate */
+var AI_KEY="pivo-ai-profiles-v1";
+var TIMEOUT_MS=8000;
+
+/* ---------- schede birra (chiave = beer_id YHOP) ------------------------- */
+var PIVO_BEERS={
+ "97127": {
+  "_": "Nina · Brewfist (spina 1 al 22/10/2026)",
+  "match": [
+   "brewfist|nina"
+  ],
+  "name": "Nina",
+  "style": "Pils Gluten Free",
+  "word": "Gluten Free Pils",
+  "acc": "#FF9E1B",
+  "ink": "#0B1012",
+  "note": "Pils senza glutine chiara e beverina: cereale, luppolo erbaceo, finale pulito e secco.",
+  "noteEn": "Clean gluten-free pils: grainy, herbal hops, crisp dry finish.",
+  "meters": [
+   2,
+   2,
+   2
+  ],
+  "chip": 0,
+  "ring": "Nina",
+  "tv": {
+   "glass": "pilsner",
+   "liq": "#F0B429",
+   "foam": "#FFF6E3",
+   "accent": "#FF9E1B",
+   "key": "senza glutine · erbacea · secca",
+   "keyEn": "gluten-free · herbal · dry"
+  },
+  "svg": "<svg viewBox=\"0 0 120 300\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\"><defs><linearGradient id=\"lg{ID}\" x1=\"0\" y1=\"0\" x2=\"1\" y2=\"0\"><stop offset=\"0\" stop-color=\"#fff\" stop-opacity=\"0.22\"/><stop offset=\"0.28\" stop-color=\"#fff\" stop-opacity=\"0\"/><stop offset=\"0.82\" stop-color=\"#F7D361\" stop-opacity=\"0.55\"/></linearGradient><clipPath id=\"gc{ID}\"><path d=\"M43 44 L77 44 L70 250 Q70 264 60 264 Q50 264 50 250 Z\"/></clipPath></defs><rect x=\"53\" y=\"264\" width=\"14\" height=\"18\" fill=\"#fff\" opacity=\"0.26\"/><ellipse cx=\"60\" cy=\"284\" rx=\"19\" ry=\"5\" fill=\"#fff\" opacity=\"0.30\"/><g clip-path=\"url(#gc{ID})\"><rect x=\"30\" y=\"64\" width=\"60\" height=\"210\" fill=\"#F1C13A\" opacity=\"0.92\"/><rect x=\"30\" y=\"64\" width=\"60\" height=\"210\" fill=\"url(#lg{ID})\"/><circle cx=\"59.7\" cy=\"174.7\" r=\"1.0\" fill=\"#fff\" opacity=\"0.21\"/><circle cx=\"58.3\" cy=\"165.1\" r=\"0.9\" fill=\"#fff\" opacity=\"0.34\"/><circle cx=\"62.7\" cy=\"148.3\" r=\"1.2\" fill=\"#fff\" opacity=\"0.32\"/><circle cx=\"64.7\" cy=\"89.5\" r=\"1.5\" fill=\"#fff\" opacity=\"0.21\"/><circle cx=\"65.2\" cy=\"103.8\" r=\"1.6\" fill=\"#fff\" opacity=\"0.26\"/><circle cx=\"50.3\" cy=\"84.8\" r=\"2.2\" fill=\"#fff\" opacity=\"0.35\"/><circle cx=\"48.6\" cy=\"154.2\" r=\"2.2\" fill=\"#fff\" opacity=\"0.20\"/><circle cx=\"57.6\" cy=\"172.9\" r=\"1.8\" fill=\"#fff\" opacity=\"0.22\"/><circle cx=\"50.1\" cy=\"249.5\" r=\"1.5\" fill=\"#fff\" opacity=\"0.21\"/><circle cx=\"61.4\" cy=\"134.1\" r=\"1.0\" fill=\"#fff\" opacity=\"0.31\"/><circle cx=\"55.6\" cy=\"137.6\" r=\"0.9\" fill=\"#fff\" opacity=\"0.35\"/><circle cx=\"52.2\" cy=\"231.6\" r=\"1.5\" fill=\"#fff\" opacity=\"0.21\"/><circle cx=\"63.1\" cy=\"146.7\" r=\"1.9\" fill=\"#fff\" opacity=\"0.29\"/><circle cx=\"49.1\" cy=\"115.4\" r=\"1.5\" fill=\"#fff\" opacity=\"0.18\"/><circle cx=\"46.4\" cy=\"148.6\" r=\"1.8\" fill=\"#fff\" opacity=\"0.29\"/><circle cx=\"73.7\" cy=\"133.2\" r=\"1.5\" fill=\"#fff\" opacity=\"0.26\"/><ellipse cx=\"60\" cy=\"64\" rx=\"17\" ry=\"7\" fill=\"#FFFBEA\"/><rect x=\"43\" y=\"56\" width=\"34\" height=\"10\" fill=\"#FFFBEA\"/><ellipse cx=\"60\" cy=\"56\" rx=\"17\" ry=\"6\" fill=\"#fff\" opacity=\"0.5\"/></g><path d=\"M43 44 L77 44 L70 250 Q70 264 60 264 Q50 264 50 250 Z\" fill=\"#fff\" opacity=\"0.05\"/><path d=\"M43 44 L77 44 L70 250 Q70 264 60 264 Q50 264 50 250 Z\" fill=\"none\" stroke=\"#fff\" stroke-opacity=\"0.55\" stroke-width=\"2.5\" stroke-linejoin=\"round\"/><path d=\"M46 50 L52 246\" stroke=\"#fff\" stroke-opacity=\"0.34\" stroke-width=\"3\" fill=\"none\" stroke-linecap=\"round\"/></svg>"
+ },
+ "88044": {
+  "_": "galaxie · Brewfist (spina 2 al 22/10/2026)",
+  "match": [
+   "brewfist|galaxie"
+  ],
+  "name": "Galaxie",
+  "style": "Nelson Saison",
+  "word": "Saison",
+  "acc": "#FFC24B",
+  "ink": "#0B1012",
+  "note": "Saison luppolata Nelson: uva bianca, frutta e pepe, corpo leggero e finale secco e vivace.",
+  "noteEn": "Nelson-hopped saison: white grape, fruit and pepper, light body, dry lively finish.",
+  "meters": [
+   3,
+   2,
+   4
+  ],
+  "chip": 6,
+  "ring": "Galaxie",
+  "tv": {
+   "glass": "tulip",
+   "liq": "#EDBE4A",
+   "foam": "#FFFBF0",
+   "accent": "#FFC24B",
+   "key": "uva bianca · frutta · pepe",
+   "keyEn": "white grape · fruit · pepper"
+  },
+  "svg": "<svg viewBox=\"0 0 120 300\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\"><defs><linearGradient id=\"lg{ID}\" x1=\"0\" y1=\"0\" x2=\"1\" y2=\"0\"><stop offset=\"0\" stop-color=\"#fff\" stop-opacity=\"0.22\"/><stop offset=\"0.28\" stop-color=\"#fff\" stop-opacity=\"0\"/><stop offset=\"0.82\" stop-color=\"#F3C142\" stop-opacity=\"0.55\"/></linearGradient><clipPath id=\"gc{ID}\"><path d=\"M44 96 Q32 62 48 52 L72 52 Q88 62 76 96 Q90 148 60 166 Q30 148 44 96 Z\"/></clipPath></defs><rect x=\"56\" y=\"166\" width=\"8\" height=\"24\" fill=\"#fff\" opacity=\"0.28\"/><ellipse cx=\"60\" cy=\"196\" rx=\"21\" ry=\"6\" fill=\"#fff\" opacity=\"0.30\"/><g clip-path=\"url(#gc{ID})\"><rect x=\"24\" y=\"68\" width=\"72\" height=\"110\" fill=\"#EDBE4A\" opacity=\"0.94\"/><rect x=\"24\" y=\"68\" width=\"72\" height=\"110\" fill=\"url(#lg{ID})\"/><circle cx=\"64.5\" cy=\"154.4\" r=\"1.2\" fill=\"#fff\" opacity=\"0.18\"/><circle cx=\"51.8\" cy=\"142.8\" r=\"1.1\" fill=\"#fff\" opacity=\"0.23\"/><circle cx=\"69.1\" cy=\"109.1\" r=\"1.7\" fill=\"#fff\" opacity=\"0.33\"/><circle cx=\"73.6\" cy=\"123.5\" r=\"1.2\" fill=\"#fff\" opacity=\"0.25\"/><circle cx=\"58.3\" cy=\"128.7\" r=\"1.2\" fill=\"#fff\" opacity=\"0.32\"/><circle cx=\"48.5\" cy=\"144.4\" r=\"0.9\" fill=\"#fff\" opacity=\"0.22\"/><circle cx=\"58.2\" cy=\"125.3\" r=\"1.7\" fill=\"#fff\" opacity=\"0.29\"/><circle cx=\"67.1\" cy=\"111.7\" r=\"2.1\" fill=\"#fff\" opacity=\"0.17\"/><circle cx=\"46.9\" cy=\"114.6\" r=\"2.1\" fill=\"#fff\" opacity=\"0.18\"/><circle cx=\"68.4\" cy=\"133.0\" r=\"2.1\" fill=\"#fff\" opacity=\"0.23\"/><circle cx=\"68.0\" cy=\"145.1\" r=\"1.7\" fill=\"#fff\" opacity=\"0.29\"/><circle cx=\"54.1\" cy=\"152.9\" r=\"2.0\" fill=\"#fff\" opacity=\"0.32\"/><ellipse cx=\"60\" cy=\"68\" rx=\"20\" ry=\"7\" fill=\"#FCF0D2\"/><rect x=\"40\" y=\"60\" width=\"40\" height=\"10\" fill=\"#FBE9BE\"/><ellipse cx=\"60\" cy=\"60\" rx=\"20\" ry=\"6\" fill=\"#fff\" opacity=\"0.5\"/></g><path d=\"M44 96 Q32 62 48 52 L72 52 Q88 62 76 96 Q90 148 60 166 Q30 148 44 96 Z\" fill=\"#fff\" opacity=\"0.05\"/><path d=\"M44 96 Q32 62 48 52 L72 52 Q88 62 76 96 Q90 148 60 166 Q30 148 44 96 Z\" fill=\"none\" stroke=\"#fff\" stroke-opacity=\"0.55\" stroke-width=\"2.5\" stroke-linejoin=\"round\"/><path d=\"M48 60 Q42 100 52 150\" stroke=\"#fff\" stroke-opacity=\"0.34\" stroke-width=\"3\" fill=\"none\" stroke-linecap=\"round\"/></svg>"
+ },
+ "58210": {
+  "_": "Spaceman · Brewfist (spina 3 al 22/10/2026)",
+  "match": [
+   "brewfist|spaceman"
+  ],
+  "name": "Spaceman",
+  "style": "West Coast IPA",
+  "word": "West Coast IPA",
+  "acc": "#2FBFA8",
+  "ink": "#0B1012",
+  "note": "West Coast IPA secca e luppolata: resina, pino e agrumi, amaro deciso e finale pulito.",
+  "noteEn": "Dry, hoppy West Coast IPA: resin, pine, citrus, firm bitterness, clean finish.",
+  "meters": [
+   5,
+   4,
+   5
+  ],
+  "chip": 3,
+  "ring": "Spaceman",
+  "tv": {
+   "glass": "nonic",
+   "liq": "#E58A22",
+   "foam": "#FFF1DA",
+   "accent": "#2FBFA8",
+   "key": "resina · pino · agrumi",
+   "keyEn": "resin · pine · citrus"
+  },
+  "svg": "<svg viewBox=\"0 0 120 300\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\"><defs><linearGradient id=\"lg{ID}\" x1=\"0\" y1=\"0\" x2=\"1\" y2=\"0\"><stop offset=\"0\" stop-color=\"#fff\" stop-opacity=\"0.22\"/><stop offset=\"0.28\" stop-color=\"#fff\" stop-opacity=\"0\"/><stop offset=\"0.82\" stop-color=\"#F0A828\" stop-opacity=\"0.55\"/></linearGradient><clipPath id=\"gc{ID}\"><path d=\"M44 50 L76 50 L74 92 Q82 96 80 106 L72 250 Q72 262 60 262 Q48 262 48 250 L40 106 Q38 96 46 92 Z\"/></clipPath></defs><ellipse cx=\"60\" cy=\"282\" rx=\"19\" ry=\"5\" fill=\"#fff\" opacity=\"0.28\"/><g clip-path=\"url(#gc{ID})\"><rect x=\"30\" y=\"70\" width=\"60\" height=\"200\" fill=\"#E28C12\" opacity=\"0.97\"/><rect x=\"30\" y=\"70\" width=\"60\" height=\"200\" fill=\"url(#lg{ID})\"/><rect x=\"30\" y=\"70\" width=\"60\" height=\"200\" fill=\"#F0A828\" opacity=\"0.30\"/><circle cx=\"57.3\" cy=\"233.3\" r=\"1.6\" fill=\"#fff\" opacity=\"0.32\"/><circle cx=\"61.5\" cy=\"147.8\" r=\"0.8\" fill=\"#fff\" opacity=\"0.19\"/><circle cx=\"74.5\" cy=\"159.1\" r=\"1.0\" fill=\"#fff\" opacity=\"0.31\"/><circle cx=\"60.3\" cy=\"227.7\" r=\"0.9\" fill=\"#fff\" opacity=\"0.29\"/><circle cx=\"68.6\" cy=\"158.8\" r=\"1.1\" fill=\"#fff\" opacity=\"0.22\"/><circle cx=\"51.2\" cy=\"199.1\" r=\"2.1\" fill=\"#fff\" opacity=\"0.32\"/><circle cx=\"58.8\" cy=\"234.5\" r=\"1.8\" fill=\"#fff\" opacity=\"0.35\"/><ellipse cx=\"60\" cy=\"70\" rx=\"16\" ry=\"6\" fill=\"#FBEBC8\"/><rect x=\"44\" y=\"62\" width=\"32\" height=\"10\" fill=\"#FBEBC8\"/><ellipse cx=\"60\" cy=\"62\" rx=\"16\" ry=\"5\" fill=\"#fff\" opacity=\"0.5\"/></g><path d=\"M44 50 L76 50 L74 92 Q82 96 80 106 L72 250 Q72 262 60 262 Q48 262 48 250 L40 106 Q38 96 46 92 Z\" fill=\"#fff\" opacity=\"0.05\"/><path d=\"M44 50 L76 50 L74 92 Q82 96 80 106 L72 250 Q72 262 60 262 Q48 262 48 250 L40 106 Q38 96 46 92 Z\" fill=\"none\" stroke=\"#fff\" stroke-opacity=\"0.55\" stroke-width=\"2.5\" stroke-linejoin=\"round\"/><path d=\"M48 56 L52 248\" stroke=\"#fff\" stroke-opacity=\"0.34\" stroke-width=\"3\" fill=\"none\" stroke-linecap=\"round\"/></svg>"
+ },
+ "97187": {
+  "_": "Twelve anniversary · Hop Skin (spina 4 al 22/10/2026)",
+  "match": [
+   "hopskin|twelveanniversary"
+  ],
+  "name": "XII Anniversary",
+  "style": "American Porter",
+  "word": "American Porter",
+  "acc": "#182124",
+  "ink": "#FFFDF4",
+  "note": "American Porter scura e tostata: cioccolato, caffè e luppolo resinoso, corpo medio e finale asciutto.",
+  "noteEn": "Dark roasty American porter: chocolate, coffee, resinous hops, medium body.",
+  "meters": [
+   1,
+   5,
+   3
+  ],
+  "chip": 7,
+  "ring": "XII Anniversary",
+  "tv": {
+   "glass": "nonic",
+   "liq": "#3B2116",
+   "foam": "#E4C79A",
+   "accent": "#F5263A",
+   "key": "cioccolato · caffè · tostata",
+   "keyEn": "chocolate · coffee · roasty"
+  },
+  "svg": "<svg viewBox=\"0 0 120 300\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\"><defs><linearGradient id=\"lg{ID}\" x1=\"0\" y1=\"0\" x2=\"1\" y2=\"0\"><stop offset=\"0\" stop-color=\"#fff\" stop-opacity=\"0.22\"/><stop offset=\"0.28\" stop-color=\"#fff\" stop-opacity=\"0\"/><stop offset=\"0.82\" stop-color=\"#3a2113\" stop-opacity=\"0.55\"/></linearGradient><clipPath id=\"gc{ID}\"><path d=\"M42 98 Q34 60 60 56 Q86 60 78 98 Q90 142 60 158 Q30 142 42 98 Z\"/></clipPath></defs><rect x=\"56\" y=\"158\" width=\"8\" height=\"22\" fill=\"#fff\" opacity=\"0.28\"/><ellipse cx=\"60\" cy=\"186\" rx=\"22\" ry=\"6\" fill=\"#fff\" opacity=\"0.30\"/><g clip-path=\"url(#gc{ID})\"><rect x=\"22\" y=\"74\" width=\"76\" height=\"92\" fill=\"#1a0e08\" opacity=\"1.0\"/><rect x=\"22\" y=\"74\" width=\"76\" height=\"92\" fill=\"url(#lg{ID})\"/><circle cx=\"66.9\" cy=\"125.2\" r=\"2.1\" fill=\"#fff\" opacity=\"0.27\"/><circle cx=\"48.6\" cy=\"146.3\" r=\"1.2\" fill=\"#fff\" opacity=\"0.17\"/><circle cx=\"57.3\" cy=\"106.6\" r=\"2.0\" fill=\"#fff\" opacity=\"0.33\"/><circle cx=\"48.0\" cy=\"136.3\" r=\"1.8\" fill=\"#fff\" opacity=\"0.17\"/><circle cx=\"54.9\" cy=\"106.2\" r=\"1.7\" fill=\"#fff\" opacity=\"0.35\"/><ellipse cx=\"60\" cy=\"74\" rx=\"21\" ry=\"7\" fill=\"#d8b483\"/><rect x=\"40\" y=\"67\" width=\"40\" height=\"9\" fill=\"#d8b483\"/><ellipse cx=\"60\" cy=\"67\" rx=\"21\" ry=\"5\" fill=\"#fff\" opacity=\"0.5\"/></g><path d=\"M42 98 Q34 60 60 56 Q86 60 78 98 Q90 142 60 158 Q30 142 42 98 Z\" fill=\"#fff\" opacity=\"0.05\"/><path d=\"M42 98 Q34 60 60 56 Q86 60 78 98 Q90 142 60 158 Q30 142 42 98 Z\" fill=\"none\" stroke=\"#fff\" stroke-opacity=\"0.55\" stroke-width=\"2.5\" stroke-linejoin=\"round\"/><path d=\"M46 66 Q38 100 50 140\" stroke=\"#fff\" stroke-opacity=\"0.34\" stroke-width=\"3\" fill=\"none\" stroke-linecap=\"round\"/></svg>"
+ },
+ "95979": {
+  "_": "KOHU · Brewfist (spina 5 al 22/10/2026)",
+  "match": [
+   "brewfist|kohu"
+  ],
+  "name": "Kohu",
+  "style": "New England IPA",
+  "word": "New England IPA",
+  "acc": "#FFC24B",
+  "ink": "#0B1012",
+  "note": "NEIPA torbida e succosa: frutta tropicale e agrumi, amaro morbido e corpo avvolgente.",
+  "noteEn": "Hazy, juicy NEIPA: tropical fruit and citrus, soft bitterness, plush body.",
+  "meters": [
+   4,
+   3,
+   5
+  ],
+  "chip": 3,
+  "ring": "Kohu",
+  "tv": {
+   "glass": "nonic",
+   "liq": "#E89A2E",
+   "foam": "#FFF3DC",
+   "accent": "#FFC24B",
+   "key": "tropicale · agrumi · morbida",
+   "keyEn": "tropical · citrus · soft"
+  },
+  "svg": "<svg viewBox=\"0 0 120 300\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\"><defs><linearGradient id=\"lg{ID}\" x1=\"0\" y1=\"0\" x2=\"1\" y2=\"0\"><stop offset=\"0\" stop-color=\"#fff\" stop-opacity=\"0.22\"/><stop offset=\"0.28\" stop-color=\"#fff\" stop-opacity=\"0\"/><stop offset=\"0.82\" stop-color=\"#F3D27C\" stop-opacity=\"0.55\"/></linearGradient><clipPath id=\"gc{ID}\"><path d=\"M44 50 L76 50 L74 92 Q82 96 80 106 L72 250 Q72 262 60 262 Q48 262 48 250 L40 106 Q38 96 46 92 Z\"/></clipPath></defs><ellipse cx=\"60\" cy=\"282\" rx=\"19\" ry=\"5\" fill=\"#fff\" opacity=\"0.28\"/><g clip-path=\"url(#gc{ID})\"><rect x=\"30\" y=\"70\" width=\"60\" height=\"200\" fill=\"#E4A83C\" opacity=\"0.92\"/><rect x=\"30\" y=\"70\" width=\"60\" height=\"200\" fill=\"url(#lg{ID})\"/><rect x=\"30\" y=\"70\" width=\"60\" height=\"200\" fill=\"#F3D27C\" opacity=\"0.30\"/><circle cx=\"57.3\" cy=\"233.3\" r=\"1.6\" fill=\"#fff\" opacity=\"0.32\"/><circle cx=\"61.5\" cy=\"147.8\" r=\"0.8\" fill=\"#fff\" opacity=\"0.19\"/><circle cx=\"74.5\" cy=\"159.1\" r=\"1.0\" fill=\"#fff\" opacity=\"0.31\"/><circle cx=\"60.3\" cy=\"227.7\" r=\"0.9\" fill=\"#fff\" opacity=\"0.29\"/><circle cx=\"68.6\" cy=\"158.8\" r=\"1.1\" fill=\"#fff\" opacity=\"0.22\"/><circle cx=\"51.2\" cy=\"199.1\" r=\"2.1\" fill=\"#fff\" opacity=\"0.32\"/><circle cx=\"58.8\" cy=\"234.5\" r=\"1.8\" fill=\"#fff\" opacity=\"0.35\"/><ellipse cx=\"60\" cy=\"70\" rx=\"16\" ry=\"6\" fill=\"#FCEFD0\"/><rect x=\"44\" y=\"62\" width=\"32\" height=\"10\" fill=\"#FCEFD0\"/><ellipse cx=\"60\" cy=\"62\" rx=\"16\" ry=\"5\" fill=\"#fff\" opacity=\"0.5\"/></g><path d=\"M44 50 L76 50 L74 92 Q82 96 80 106 L72 250 Q72 262 60 262 Q48 262 48 250 L40 106 Q38 96 46 92 Z\" fill=\"#fff\" opacity=\"0.05\"/><path d=\"M44 50 L76 50 L74 92 Q82 96 80 106 L72 250 Q72 262 60 262 Q48 262 48 250 L40 106 Q38 96 46 92 Z\" fill=\"none\" stroke=\"#fff\" stroke-opacity=\"0.55\" stroke-width=\"2.5\" stroke-linejoin=\"round\"/><path d=\"M48 56 L52 248\" stroke=\"#fff\" stroke-opacity=\"0.34\" stroke-width=\"3\" fill=\"none\" stroke-linecap=\"round\"/></svg>"
+ },
+ "76719": {
+  "_": "O’ Zapft Is · Hop Skin (spina 6 al 22/10/2026)",
+  "match": [
+   "hopskin|ozapftis"
+  ],
+  "name": "O'Zappft Is",
+  "style": "Märzen / Oktoberfest",
+  "word": "Märzen",
+  "acc": "#F5263A",
+  "ink": "#FFFDF4",
+  "note": "Märzen da Oktoberfest ambrata e maltata: crosta di pane, caramello e finale morbido.",
+  "noteEn": "Amber malty Oktoberfest märzen: bread crust, caramel, smooth finish.",
+  "meters": [
+   4,
+   5,
+   5
+  ],
+  "chip": 5,
+  "ring": "O'Zappft Is",
+  "tv": {
+   "glass": "tulip",
+   "liq": "#C8741E",
+   "foam": "#F3DDB4",
+   "accent": "#F5263A",
+   "key": "crosta di pane · caramello",
+   "keyEn": "bread crust · caramel"
+  },
+  "svg": "<svg viewBox=\"0 0 120 300\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\"><defs><linearGradient id=\"lg{ID}\" x1=\"0\" y1=\"0\" x2=\"1\" y2=\"0\"><stop offset=\"0\" stop-color=\"#fff\" stop-opacity=\"0.22\"/><stop offset=\"0.28\" stop-color=\"#fff\" stop-opacity=\"0\"/><stop offset=\"0.82\" stop-color=\"#E8A33A\" stop-opacity=\"0.55\"/></linearGradient><clipPath id=\"gc{ID}\"><path d=\"M43 44 L77 44 L70 250 Q70 264 60 264 Q50 264 50 250 Z\"/></clipPath></defs><rect x=\"53\" y=\"264\" width=\"14\" height=\"18\" fill=\"#fff\" opacity=\"0.26\"/><ellipse cx=\"60\" cy=\"284\" rx=\"19\" ry=\"5\" fill=\"#fff\" opacity=\"0.30\"/><g clip-path=\"url(#gc{ID})\"><rect x=\"30\" y=\"64\" width=\"60\" height=\"210\" fill=\"#D98A1F\" opacity=\"0.92\"/><rect x=\"30\" y=\"64\" width=\"60\" height=\"210\" fill=\"url(#lg{ID})\"/><circle cx=\"59.7\" cy=\"174.7\" r=\"1.0\" fill=\"#fff\" opacity=\"0.21\"/><circle cx=\"58.3\" cy=\"165.1\" r=\"0.9\" fill=\"#fff\" opacity=\"0.34\"/><circle cx=\"62.7\" cy=\"148.3\" r=\"1.2\" fill=\"#fff\" opacity=\"0.32\"/><circle cx=\"64.7\" cy=\"89.5\" r=\"1.5\" fill=\"#fff\" opacity=\"0.21\"/><circle cx=\"65.2\" cy=\"103.8\" r=\"1.6\" fill=\"#fff\" opacity=\"0.26\"/><circle cx=\"50.3\" cy=\"84.8\" r=\"2.2\" fill=\"#fff\" opacity=\"0.35\"/><circle cx=\"48.6\" cy=\"154.2\" r=\"2.2\" fill=\"#fff\" opacity=\"0.20\"/><circle cx=\"57.6\" cy=\"172.9\" r=\"1.8\" fill=\"#fff\" opacity=\"0.22\"/><circle cx=\"50.1\" cy=\"249.5\" r=\"1.5\" fill=\"#fff\" opacity=\"0.21\"/><circle cx=\"61.4\" cy=\"134.1\" r=\"1.0\" fill=\"#fff\" opacity=\"0.31\"/><circle cx=\"55.6\" cy=\"137.6\" r=\"0.9\" fill=\"#fff\" opacity=\"0.35\"/><circle cx=\"52.2\" cy=\"231.6\" r=\"1.5\" fill=\"#fff\" opacity=\"0.21\"/><circle cx=\"63.1\" cy=\"146.7\" r=\"1.9\" fill=\"#fff\" opacity=\"0.29\"/><circle cx=\"49.1\" cy=\"115.4\" r=\"1.5\" fill=\"#fff\" opacity=\"0.18\"/><circle cx=\"46.4\" cy=\"148.6\" r=\"1.8\" fill=\"#fff\" opacity=\"0.29\"/><circle cx=\"73.7\" cy=\"133.2\" r=\"1.5\" fill=\"#fff\" opacity=\"0.26\"/><ellipse cx=\"60\" cy=\"64\" rx=\"17\" ry=\"7\" fill=\"#FFFBEA\"/><rect x=\"43\" y=\"56\" width=\"34\" height=\"10\" fill=\"#FFFBEA\"/><ellipse cx=\"60\" cy=\"56\" rx=\"17\" ry=\"6\" fill=\"#fff\" opacity=\"0.5\"/></g><path d=\"M43 44 L77 44 L70 250 Q70 264 60 264 Q50 264 50 250 Z\" fill=\"#fff\" opacity=\"0.05\"/><path d=\"M43 44 L77 44 L70 250 Q70 264 60 264 Q50 264 50 250 Z\" fill=\"none\" stroke=\"#fff\" stroke-opacity=\"0.55\" stroke-width=\"2.5\" stroke-linejoin=\"round\"/><path d=\"M46 50 L52 246\" stroke=\"#fff\" stroke-opacity=\"0.34\" stroke-width=\"3\" fill=\"none\" stroke-linecap=\"round\"/></svg>"
+ },
+ "66158": {
+  "_": "Zinnebir · Brasserie de la Senne (spina 7 al 22/10/2026)",
+  "match": [
+   "brasseriedelasenne|zinnebir"
+  ],
+  "name": "Zinne Bir",
+  "style": "Belgian Blond Ale",
+  "word": "Belgian Blond",
+  "acc": "#2FBFA8",
+  "ink": "#0B1012",
+  "note": "Belgian blond ale dorata: malto dolce, frutta gialla e spezie lievi, finale secco e beverino.",
+  "noteEn": "Golden Belgian blond ale: sweet malt, stone fruit, gentle spice, dry drinkable finish.",
+  "meters": [
+   1,
+   2,
+   3
+  ],
+  "chip": 2,
+  "ring": "Zinne Bir",
+  "tv": {
+   "glass": "tulip",
+   "liq": "#E8B83E",
+   "foam": "#FFFBF0",
+   "accent": "#2FBFA8",
+   "key": "frutta gialla · spezie · secca",
+   "keyEn": "stone fruit · spice · dry"
+  },
+  "svg": "<svg viewBox=\"0 0 120 300\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\"><defs><linearGradient id=\"lg{ID}\" x1=\"0\" y1=\"0\" x2=\"1\" y2=\"0\"><stop offset=\"0\" stop-color=\"#fff\" stop-opacity=\"0.22\"/><stop offset=\"0.28\" stop-color=\"#fff\" stop-opacity=\"0\"/><stop offset=\"0.82\" stop-color=\"#F3C142\" stop-opacity=\"0.55\"/></linearGradient><clipPath id=\"gc{ID}\"><path d=\"M44 96 Q32 62 48 52 L72 52 Q88 62 76 96 Q90 148 60 166 Q30 148 44 96 Z\"/></clipPath></defs><rect x=\"56\" y=\"166\" width=\"8\" height=\"24\" fill=\"#fff\" opacity=\"0.28\"/><ellipse cx=\"60\" cy=\"196\" rx=\"21\" ry=\"6\" fill=\"#fff\" opacity=\"0.30\"/><g clip-path=\"url(#gc{ID})\"><rect x=\"24\" y=\"68\" width=\"72\" height=\"110\" fill=\"#EDBE4A\" opacity=\"0.94\"/><rect x=\"24\" y=\"68\" width=\"72\" height=\"110\" fill=\"url(#lg{ID})\"/><circle cx=\"64.5\" cy=\"154.4\" r=\"1.2\" fill=\"#fff\" opacity=\"0.18\"/><circle cx=\"51.8\" cy=\"142.8\" r=\"1.1\" fill=\"#fff\" opacity=\"0.23\"/><circle cx=\"69.1\" cy=\"109.1\" r=\"1.7\" fill=\"#fff\" opacity=\"0.33\"/><circle cx=\"73.6\" cy=\"123.5\" r=\"1.2\" fill=\"#fff\" opacity=\"0.25\"/><circle cx=\"58.3\" cy=\"128.7\" r=\"1.2\" fill=\"#fff\" opacity=\"0.32\"/><circle cx=\"48.5\" cy=\"144.4\" r=\"0.9\" fill=\"#fff\" opacity=\"0.22\"/><circle cx=\"58.2\" cy=\"125.3\" r=\"1.7\" fill=\"#fff\" opacity=\"0.29\"/><circle cx=\"67.1\" cy=\"111.7\" r=\"2.1\" fill=\"#fff\" opacity=\"0.17\"/><circle cx=\"46.9\" cy=\"114.6\" r=\"2.1\" fill=\"#fff\" opacity=\"0.18\"/><circle cx=\"68.4\" cy=\"133.0\" r=\"2.1\" fill=\"#fff\" opacity=\"0.23\"/><circle cx=\"68.0\" cy=\"145.1\" r=\"1.7\" fill=\"#fff\" opacity=\"0.29\"/><circle cx=\"54.1\" cy=\"152.9\" r=\"2.0\" fill=\"#fff\" opacity=\"0.32\"/><ellipse cx=\"60\" cy=\"68\" rx=\"20\" ry=\"7\" fill=\"#FCF0D2\"/><rect x=\"40\" y=\"60\" width=\"40\" height=\"10\" fill=\"#FBE9BE\"/><ellipse cx=\"60\" cy=\"60\" rx=\"20\" ry=\"6\" fill=\"#fff\" opacity=\"0.5\"/></g><path d=\"M44 96 Q32 62 48 52 L72 52 Q88 62 76 96 Q90 148 60 166 Q30 148 44 96 Z\" fill=\"#fff\" opacity=\"0.05\"/><path d=\"M44 96 Q32 62 48 52 L72 52 Q88 62 76 96 Q90 148 60 166 Q30 148 44 96 Z\" fill=\"none\" stroke=\"#fff\" stroke-opacity=\"0.55\" stroke-width=\"2.5\" stroke-linejoin=\"round\"/><path d=\"M48 60 Q42 100 52 150\" stroke=\"#fff\" stroke-opacity=\"0.34\" stroke-width=\"3\" fill=\"none\" stroke-linecap=\"round\"/></svg>"
+ },
+ "97128": {
+  "_": "Gose che capitano · Hop Skin (spina 8 al 22/10/2026)",
+  "match": [
+   "hopskin|gosechecapitano"
+  ],
+  "name": "Gose che capitano",
+  "style": "Gose",
+  "word": "Gose",
+  "acc": "#FF9E1B",
+  "ink": "#0B1012",
+  "note": "Gose acidula e salina: coriandolo e limone, leggera, frizzante e molto dissetante.",
+  "noteEn": "Tart, salty gose: coriander and lemon, light, zesty and very refreshing.",
+  "meters": [
+   1,
+   1,
+   3
+  ],
+  "chip": 1,
+  "ring": "Gose che capitano",
+  "tv": {
+   "glass": "weizen",
+   "liq": "#F3DC8E",
+   "foam": "#FFFDF4",
+   "accent": "#FF9E1B",
+   "key": "acidula · salina · limone",
+   "keyEn": "tart · salty · lemon"
+  },
+  "svg": "<svg viewBox=\"0 0 120 300\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\"><defs><linearGradient id=\"lg{ID}\" x1=\"0\" y1=\"0\" x2=\"1\" y2=\"0\"><stop offset=\"0\" stop-color=\"#fff\" stop-opacity=\"0.22\"/><stop offset=\"0.28\" stop-color=\"#fff\" stop-opacity=\"0\"/><stop offset=\"0.82\" stop-color=\"#FAECBE\" stop-opacity=\"0.55\"/></linearGradient><clipPath id=\"gc{ID}\"><path d=\"M50 258 Q48 250 49 230 L45 150 Q43 110 52 90 L54 62 Q54 54 60 54 Q66 54 66 62 L68 90 Q77 110 75 150 L71 230 Q72 250 70 258 Q65 262 60 262 Q55 262 50 258 Z\"/></clipPath></defs><rect x=\"55\" y=\"262\" width=\"10\" height=\"16\" fill=\"#fff\" opacity=\"0.26\"/><ellipse cx=\"60\" cy=\"280\" rx=\"17\" ry=\"5\" fill=\"#fff\" opacity=\"0.28\"/><g clip-path=\"url(#gc{ID})\"><rect x=\"40\" y=\"80\" width=\"40\" height=\"184\" fill=\"#F3DC8E\" opacity=\"0.82\"/><rect x=\"40\" y=\"80\" width=\"40\" height=\"184\" fill=\"url(#lg{ID})\"/><rect x=\"40\" y=\"80\" width=\"40\" height=\"184\" fill=\"#F6DE84\" opacity=\"0.26\"/><circle cx=\"54.9\" cy=\"129.2\" r=\"2.2\" fill=\"#fff\" opacity=\"0.24\"/><circle cx=\"64.7\" cy=\"135.0\" r=\"2.2\" fill=\"#fff\" opacity=\"0.25\"/><circle cx=\"56.3\" cy=\"172.2\" r=\"2.2\" fill=\"#fff\" opacity=\"0.30\"/><circle cx=\"55.9\" cy=\"196.7\" r=\"1.8\" fill=\"#fff\" opacity=\"0.16\"/><circle cx=\"72.0\" cy=\"212.6\" r=\"2.1\" fill=\"#fff\" opacity=\"0.19\"/><circle cx=\"52.0\" cy=\"145.8\" r=\"2.1\" fill=\"#fff\" opacity=\"0.28\"/><circle cx=\"69.0\" cy=\"150.3\" r=\"1.3\" fill=\"#fff\" opacity=\"0.30\"/><circle cx=\"48.1\" cy=\"212.1\" r=\"1.6\" fill=\"#fff\" opacity=\"0.26\"/><circle cx=\"53.4\" cy=\"185.3\" r=\"0.8\" fill=\"#fff\" opacity=\"0.24\"/><circle cx=\"54.4\" cy=\"97.9\" r=\"1.5\" fill=\"#fff\" opacity=\"0.19\"/><path d=\"M52 90 Q52 66 60 64 Q68 66 68 90 Q68 96 60 96 Q52 96 52 90 Z\" fill=\"#FFFDF4\"/><ellipse cx=\"60\" cy=\"80\" rx=\"18\" ry=\"7\" fill=\"#FFFDF4\"/><ellipse cx=\"55\" cy=\"62\" rx=\"7\" ry=\"6\" fill=\"#FFFDF4\"/><ellipse cx=\"65\" cy=\"60\" rx=\"6\" ry=\"5\" fill=\"#FFFDF4\"/><ellipse cx=\"60\" cy=\"72\" rx=\"16\" ry=\"6\" fill=\"#fff\" opacity=\"0.4\"/></g><path d=\"M50 258 Q48 250 49 230 L45 150 Q43 110 52 90 L54 62 Q54 54 60 54 Q66 54 66 62 L68 90 Q77 110 75 150 L71 230 Q72 250 70 258 Q65 262 60 262 Q55 262 50 258 Z\" fill=\"#fff\" opacity=\"0.05\"/><path d=\"M50 258 Q48 250 49 230 L45 150 Q43 110 52 90 L54 62 Q54 54 60 54 Q66 54 66 62 L68 90 Q77 110 75 150 L71 230 Q72 250 70 258 Q65 262 60 262 Q55 262 50 258 Z\" fill=\"none\" stroke=\"#fff\" stroke-opacity=\"0.55\" stroke-width=\"2.5\" stroke-linejoin=\"round\"/><path d=\"M54 84 Q50 160 58 250\" stroke=\"#fff\" stroke-opacity=\"0.34\" stroke-width=\"3\" fill=\"none\" stroke-linecap=\"round\"/></svg>"
+ },
+ "38203": {
+  "_": "Guinness · Guinness (Diageo) (spina 9 al 22/10/2026)",
+  "match": [
+   "guinnessdiageo|guinness"
+  ],
+  "name": "Guinness",
+  "style": "Stout",
+  "word": "Stout",
+  "acc": "#182124",
+  "ink": "#FFFDF4",
+  "note": "Dry stout irlandese cremosa: caffè tostato e cacao, secca e vellutata.",
+  "noteEn": "Creamy Irish dry stout: roasted coffee and cocoa, dry.",
+  "meters": [
+   3,
+   3,
+   2
+  ],
+  "chip": 7,
+  "ring": "Guinness",
+  "tv": {
+   "glass": "snifter",
+   "liq": "#3B2116",
+   "foam": "#E4C79A",
+   "accent": "#2FBFA8",
+   "key": "caffè · cacao · cremosa",
+   "keyEn": "coffee · cocoa · creamy"
+  },
+  "svg": "<svg viewBox=\"0 0 120 300\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\"><defs><linearGradient id=\"lg{ID}\" x1=\"0\" y1=\"0\" x2=\"1\" y2=\"0\"><stop offset=\"0\" stop-color=\"#fff\" stop-opacity=\"0.22\"/><stop offset=\"0.28\" stop-color=\"#fff\" stop-opacity=\"0\"/><stop offset=\"0.82\" stop-color=\"#3a2113\" stop-opacity=\"0.55\"/></linearGradient><clipPath id=\"gc{ID}\"><path d=\"M42 98 Q34 60 60 56 Q86 60 78 98 Q90 142 60 158 Q30 142 42 98 Z\"/></clipPath></defs><rect x=\"56\" y=\"158\" width=\"8\" height=\"22\" fill=\"#fff\" opacity=\"0.28\"/><ellipse cx=\"60\" cy=\"186\" rx=\"22\" ry=\"6\" fill=\"#fff\" opacity=\"0.30\"/><g clip-path=\"url(#gc{ID})\"><rect x=\"22\" y=\"74\" width=\"76\" height=\"92\" fill=\"#1a0e08\" opacity=\"1.0\"/><rect x=\"22\" y=\"74\" width=\"76\" height=\"92\" fill=\"url(#lg{ID})\"/><circle cx=\"66.9\" cy=\"125.2\" r=\"2.1\" fill=\"#fff\" opacity=\"0.27\"/><circle cx=\"48.6\" cy=\"146.3\" r=\"1.2\" fill=\"#fff\" opacity=\"0.17\"/><circle cx=\"57.3\" cy=\"106.6\" r=\"2.0\" fill=\"#fff\" opacity=\"0.33\"/><circle cx=\"48.0\" cy=\"136.3\" r=\"1.8\" fill=\"#fff\" opacity=\"0.17\"/><circle cx=\"54.9\" cy=\"106.2\" r=\"1.7\" fill=\"#fff\" opacity=\"0.35\"/><ellipse cx=\"60\" cy=\"74\" rx=\"21\" ry=\"7\" fill=\"#d8b483\"/><rect x=\"40\" y=\"67\" width=\"40\" height=\"9\" fill=\"#d8b483\"/><ellipse cx=\"60\" cy=\"67\" rx=\"21\" ry=\"5\" fill=\"#fff\" opacity=\"0.5\"/></g><path d=\"M42 98 Q34 60 60 56 Q86 60 78 98 Q90 142 60 158 Q30 142 42 98 Z\" fill=\"#fff\" opacity=\"0.05\"/><path d=\"M42 98 Q34 60 60 56 Q86 60 78 98 Q90 142 60 158 Q30 142 42 98 Z\" fill=\"none\" stroke=\"#fff\" stroke-opacity=\"0.55\" stroke-width=\"2.5\" stroke-linejoin=\"round\"/><path d=\"M46 66 Q38 100 50 140\" stroke=\"#fff\" stroke-opacity=\"0.34\" stroke-width=\"3\" fill=\"none\" stroke-linecap=\"round\"/></svg>"
+ },
+ "58265": {
+  "_": "La Leggenda Elijah · Brewfist (spina 10 al 22/10/2026)",
+  "match": [
+   "brewfist|laleggendaelijah"
+  ],
+  "name": "La Leggenda Elijah",
+  "style": "Imperial Stout",
+  "word": "Imperial Stout",
+  "acc": "#5A3520",
+  "ink": "#FFFDF4",
+  "note": "Imperial stout potente e avvolgente: cacao amaro, caffè tostato e frutta scura, corpo pieno e finale lungo e caldo.",
+  "noteEn": "Big, warming imperial stout: bitter cocoa, roasted coffee, dark fruit, full body, long finish.",
+  "meters": [
+   3,
+   5,
+   5
+  ],
+  "chip": 4,
+  "ring": "Elijah",
+  "tv": {
+   "glass": "snifter",
+   "liq": "#2A170C",
+   "foam": "#B8895A",
+   "accent": "#FFC24B",
+   "key": "cacao · caffè · frutta scura",
+   "keyEn": "cocoa · coffee · dark fruit"
+  },
+  "svg": "<svg viewBox=\"0 0 120 300\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\"><defs><linearGradient id=\"lg{ID}\" x1=\"0\" y1=\"0\" x2=\"1\" y2=\"0\"><stop offset=\"0\" stop-color=\"#fff\" stop-opacity=\"0.22\"/><stop offset=\"0.28\" stop-color=\"#fff\" stop-opacity=\"0\"/><stop offset=\"0.82\" stop-color=\"#2a170c\" stop-opacity=\"0.6\"/></linearGradient><clipPath id=\"gc{ID}\"><path d=\"M42 98 Q34 60 60 56 Q86 60 78 98 Q90 142 60 158 Q30 142 42 98 Z\"/></clipPath></defs><rect x=\"56\" y=\"158\" width=\"8\" height=\"22\" fill=\"#fff\" opacity=\"0.28\"/><ellipse cx=\"60\" cy=\"186\" rx=\"22\" ry=\"6\" fill=\"#fff\" opacity=\"0.30\"/><g clip-path=\"url(#gc{ID})\"><rect x=\"22\" y=\"80\" width=\"76\" height=\"86\" fill=\"#120a05\" opacity=\"1.0\"/><rect x=\"22\" y=\"80\" width=\"76\" height=\"86\" fill=\"url(#lg{ID})\"/><circle cx=\"64.2\" cy=\"128.4\" r=\"1.6\" fill=\"#fff\" opacity=\"0.22\"/><circle cx=\"51.3\" cy=\"141.7\" r=\"1.1\" fill=\"#fff\" opacity=\"0.15\"/><circle cx=\"58.1\" cy=\"110.9\" r=\"1.4\" fill=\"#fff\" opacity=\"0.25\"/><ellipse cx=\"60\" cy=\"80\" rx=\"21\" ry=\"6\" fill=\"#a8774a\"/><rect x=\"40\" y=\"75\" width=\"40\" height=\"7\" fill=\"#a8774a\"/><ellipse cx=\"60\" cy=\"75\" rx=\"21\" ry=\"4.5\" fill=\"#fff\" opacity=\"0.4\"/></g><path d=\"M42 98 Q34 60 60 56 Q86 60 78 98 Q90 142 60 158 Q30 142 42 98 Z\" fill=\"#fff\" opacity=\"0.05\"/><path d=\"M42 98 Q34 60 60 56 Q86 60 78 98 Q90 142 60 158 Q30 142 42 98 Z\" fill=\"none\" stroke=\"#fff\" stroke-opacity=\"0.55\" stroke-width=\"2.5\" stroke-linejoin=\"round\"/><path d=\"M46 66 Q38 100 50 140\" stroke=\"#fff\" stroke-opacity=\"0.34\" stroke-width=\"3\" fill=\"none\" stroke-linecap=\"round\"/></svg>"
+ },
+ "pre-wildraccoon-1": {
+  "_": "Three Sharp Knocks · Wild Raccoon — scheda preparata (note dedotte da stile ed etichetta)",
+  "names": [
+   "threesharpknocks"
+  ],
+  "brew": "wildraccoon",
+  "word": "DDH NEIPA",
+  "acc": "#FFC24B",
+  "ink": "#0B1012",
+  "note": "NEIPA in doppio dry hopping con il luppolo sperimentale HPA 4029: torbida e succosa, frutta tropicale, amaro morbido.",
+  "noteEn": "Double dry-hopped NEIPA with experimental HPA 4029 hops: hazy, juicy, tropical, soft bitterness.",
+  "meters": [
+   2,
+   4,
+   5
+  ],
+  "chip": 3,
+  "ring": "Three Sharp Knocks",
+  "tv": {
+   "glass": "nonic",
+   "liq": "#E9A93C",
+   "foam": "#FCEFD0",
+   "accent": "#FFC24B",
+   "key": "tropicale · succosa · morbida",
+   "keyEn": "tropical · juicy · soft"
+  },
+  "svg": "<svg viewBox=\"0 0 120 300\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\"><defs><linearGradient id=\"lg{ID}\" x1=\"0\" y1=\"0\" x2=\"1\" y2=\"0\"><stop offset=\"0\" stop-color=\"#fff\" stop-opacity=\"0.22\"/><stop offset=\"0.28\" stop-color=\"#fff\" stop-opacity=\"0\"/><stop offset=\"0.82\" stop-color=\"#F3D27C\" stop-opacity=\"0.55\"/></linearGradient><clipPath id=\"gc{ID}\"><path d=\"M44 50 L76 50 L74 92 Q82 96 80 106 L72 250 Q72 262 60 262 Q48 262 48 250 L40 106 Q38 96 46 92 Z\"/></clipPath></defs><ellipse cx=\"60\" cy=\"282\" rx=\"19\" ry=\"5\" fill=\"#fff\" opacity=\"0.28\"/><g clip-path=\"url(#gc{ID})\"><rect x=\"30\" y=\"70\" width=\"60\" height=\"200\" fill=\"#E9A93C\" opacity=\"0.97\"/><rect x=\"30\" y=\"70\" width=\"60\" height=\"200\" fill=\"url(#lg{ID})\"/><rect x=\"30\" y=\"70\" width=\"60\" height=\"200\" fill=\"#F3D27C\" opacity=\"0.30\"/><circle cx=\"57.3\" cy=\"233.3\" r=\"1.6\" fill=\"#fff\" opacity=\"0.32\"/><circle cx=\"61.5\" cy=\"147.8\" r=\"0.8\" fill=\"#fff\" opacity=\"0.19\"/><circle cx=\"74.5\" cy=\"159.1\" r=\"1.0\" fill=\"#fff\" opacity=\"0.31\"/><circle cx=\"60.3\" cy=\"227.7\" r=\"0.9\" fill=\"#fff\" opacity=\"0.29\"/><circle cx=\"68.6\" cy=\"158.8\" r=\"1.1\" fill=\"#fff\" opacity=\"0.22\"/><circle cx=\"51.2\" cy=\"199.1\" r=\"2.1\" fill=\"#fff\" opacity=\"0.32\"/><circle cx=\"58.8\" cy=\"234.5\" r=\"1.8\" fill=\"#fff\" opacity=\"0.35\"/><ellipse cx=\"60\" cy=\"70\" rx=\"16\" ry=\"6\" fill=\"#FCEFD0\"/><rect x=\"44\" y=\"62\" width=\"32\" height=\"10\" fill=\"#FCEFD0\"/><ellipse cx=\"60\" cy=\"62\" rx=\"16\" ry=\"5\" fill=\"#fff\" opacity=\"0.5\"/></g><path d=\"M44 50 L76 50 L74 92 Q82 96 80 106 L72 250 Q72 262 60 262 Q48 262 48 250 L40 106 Q38 96 46 92 Z\" fill=\"#fff\" opacity=\"0.05\"/><path d=\"M44 50 L76 50 L74 92 Q82 96 80 106 L72 250 Q72 262 60 262 Q48 262 48 250 L40 106 Q38 96 46 92 Z\" fill=\"none\" stroke=\"#fff\" stroke-opacity=\"0.55\" stroke-width=\"2.5\" stroke-linejoin=\"round\"/><path d=\"M48 56 L52 248\" stroke=\"#fff\" stroke-opacity=\"0.34\" stroke-width=\"3\" fill=\"none\" stroke-linecap=\"round\"/></svg>"
+ },
+ "pre-wildraccoon-2": {
+  "_": "Block-Buster · Wild Raccoon — scheda preparata (note dedotte da stile ed etichetta)",
+  "names": [
+   "blockbuster",
+   "blockbuster",
+   "blockbuster"
+  ],
+  "brew": "wildraccoon",
+  "word": "Pale Ale",
+  "acc": "#F5263A",
+  "ink": "#FFFDF4",
+  "note": "Pale ale con Citra, Mosaic e Amarillo: lime, arancia, frutta tropicale e note floreali su un malto leggermente ambrato.",
+  "noteEn": "Pale ale with Citra, Mosaic and Amarillo: lime, orange, tropical fruit and floral notes over a light amber malt.",
+  "meters": [
+   3,
+   2,
+   4
+  ],
+  "chip": 3,
+  "ring": "Block-Buster",
+  "tv": {
+   "glass": "nonic",
+   "liq": "#E39A34",
+   "foam": "#FFF3DC",
+   "accent": "#F5263A",
+   "key": "lime · arancia · floreale",
+   "keyEn": "lime · orange · floral"
+  },
+  "svg": "<svg viewBox=\"0 0 120 300\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\"><defs><linearGradient id=\"lg{ID}\" x1=\"0\" y1=\"0\" x2=\"1\" y2=\"0\"><stop offset=\"0\" stop-color=\"#fff\" stop-opacity=\"0.22\"/><stop offset=\"0.28\" stop-color=\"#fff\" stop-opacity=\"0\"/><stop offset=\"0.82\" stop-color=\"#F0BC5E\" stop-opacity=\"0.55\"/></linearGradient><clipPath id=\"gc{ID}\"><path d=\"M44 50 L76 50 L74 92 Q82 96 80 106 L72 250 Q72 262 60 262 Q48 262 48 250 L40 106 Q38 96 46 92 Z\"/></clipPath></defs><ellipse cx=\"60\" cy=\"282\" rx=\"19\" ry=\"5\" fill=\"#fff\" opacity=\"0.28\"/><g clip-path=\"url(#gc{ID})\"><rect x=\"30\" y=\"70\" width=\"60\" height=\"200\" fill=\"#E39A34\" opacity=\"0.97\"/><rect x=\"30\" y=\"70\" width=\"60\" height=\"200\" fill=\"url(#lg{ID})\"/><rect x=\"30\" y=\"70\" width=\"60\" height=\"200\" fill=\"#F0BC5E\" opacity=\"0.30\"/><circle cx=\"57.3\" cy=\"233.3\" r=\"1.6\" fill=\"#fff\" opacity=\"0.32\"/><circle cx=\"61.5\" cy=\"147.8\" r=\"0.8\" fill=\"#fff\" opacity=\"0.19\"/><circle cx=\"74.5\" cy=\"159.1\" r=\"1.0\" fill=\"#fff\" opacity=\"0.31\"/><circle cx=\"60.3\" cy=\"227.7\" r=\"0.9\" fill=\"#fff\" opacity=\"0.29\"/><circle cx=\"68.6\" cy=\"158.8\" r=\"1.1\" fill=\"#fff\" opacity=\"0.22\"/><circle cx=\"51.2\" cy=\"199.1\" r=\"2.1\" fill=\"#fff\" opacity=\"0.32\"/><circle cx=\"58.8\" cy=\"234.5\" r=\"1.8\" fill=\"#fff\" opacity=\"0.35\"/><ellipse cx=\"60\" cy=\"70\" rx=\"16\" ry=\"6\" fill=\"#FFF3DC\"/><rect x=\"44\" y=\"62\" width=\"32\" height=\"10\" fill=\"#FFF3DC\"/><ellipse cx=\"60\" cy=\"62\" rx=\"16\" ry=\"5\" fill=\"#fff\" opacity=\"0.5\"/></g><path d=\"M44 50 L76 50 L74 92 Q82 96 80 106 L72 250 Q72 262 60 262 Q48 262 48 250 L40 106 Q38 96 46 92 Z\" fill=\"#fff\" opacity=\"0.05\"/><path d=\"M44 50 L76 50 L74 92 Q82 96 80 106 L72 250 Q72 262 60 262 Q48 262 48 250 L40 106 Q38 96 46 92 Z\" fill=\"none\" stroke=\"#fff\" stroke-opacity=\"0.55\" stroke-width=\"2.5\" stroke-linejoin=\"round\"/><path d=\"M48 56 L52 248\" stroke=\"#fff\" stroke-opacity=\"0.34\" stroke-width=\"3\" fill=\"none\" stroke-linecap=\"round\"/></svg>"
+ },
+ "pre-wildraccoon-3": {
+  "_": "Galinha Fugitiva · Wild Raccoon — scheda preparata (note dedotte da stile ed etichetta)",
+  "names": [
+   "galinhafugitiva"
+  ],
+  "brew": "wildraccoon",
+  "word": "Catharina Sour",
+  "acc": "#F5263A",
+  "ink": "#FFFDF4",
+  "note": "Catharina sour con guava, frutto della passione e lime: acidula, fruttata e molto dissetante.",
+  "noteEn": "Catharina sour with guava, passion fruit and lime: tart, fruity, very refreshing.",
+  "meters": [
+   1,
+   2,
+   4
+  ],
+  "chip": 1,
+  "ring": "Galinha Fugitiva",
+  "tv": {
+   "glass": "weizen",
+   "liq": "#F2B27A",
+   "foam": "#FFF4EA",
+   "accent": "#F5263A",
+   "key": "guava · maracuja · lime",
+   "keyEn": "guava · passion fruit · lime"
+  },
+  "svg": "<svg viewBox=\"0 0 120 300\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\"><defs><linearGradient id=\"lg{ID}\" x1=\"0\" y1=\"0\" x2=\"1\" y2=\"0\"><stop offset=\"0\" stop-color=\"#fff\" stop-opacity=\"0.22\"/><stop offset=\"0.28\" stop-color=\"#fff\" stop-opacity=\"0\"/><stop offset=\"0.82\" stop-color=\"#F7CFA0\" stop-opacity=\"0.55\"/></linearGradient><clipPath id=\"gc{ID}\"><path d=\"M50 258 Q48 250 49 230 L45 150 Q43 110 52 90 L54 62 Q54 54 60 54 Q66 54 66 62 L68 90 Q77 110 75 150 L71 230 Q72 250 70 258 Q65 262 60 262 Q55 262 50 258 Z\"/></clipPath></defs><rect x=\"55\" y=\"262\" width=\"10\" height=\"16\" fill=\"#fff\" opacity=\"0.26\"/><ellipse cx=\"60\" cy=\"280\" rx=\"17\" ry=\"5\" fill=\"#fff\" opacity=\"0.28\"/><g clip-path=\"url(#gc{ID})\"><rect x=\"40\" y=\"80\" width=\"40\" height=\"184\" fill=\"#F2B27A\" opacity=\"0.82\"/><rect x=\"40\" y=\"80\" width=\"40\" height=\"184\" fill=\"url(#lg{ID})\"/><rect x=\"40\" y=\"80\" width=\"40\" height=\"184\" fill=\"#F7CFA0\" opacity=\"0.26\"/><circle cx=\"54.9\" cy=\"129.2\" r=\"2.2\" fill=\"#fff\" opacity=\"0.24\"/><circle cx=\"64.7\" cy=\"135.0\" r=\"2.2\" fill=\"#fff\" opacity=\"0.25\"/><circle cx=\"56.3\" cy=\"172.2\" r=\"2.2\" fill=\"#fff\" opacity=\"0.30\"/><circle cx=\"55.9\" cy=\"196.7\" r=\"1.8\" fill=\"#fff\" opacity=\"0.16\"/><circle cx=\"72.0\" cy=\"212.6\" r=\"2.1\" fill=\"#fff\" opacity=\"0.19\"/><circle cx=\"52.0\" cy=\"145.8\" r=\"2.1\" fill=\"#fff\" opacity=\"0.28\"/><circle cx=\"69.0\" cy=\"150.3\" r=\"1.3\" fill=\"#fff\" opacity=\"0.30\"/><circle cx=\"48.1\" cy=\"212.1\" r=\"1.6\" fill=\"#fff\" opacity=\"0.26\"/><circle cx=\"53.4\" cy=\"185.3\" r=\"0.8\" fill=\"#fff\" opacity=\"0.24\"/><circle cx=\"54.4\" cy=\"97.9\" r=\"1.5\" fill=\"#fff\" opacity=\"0.19\"/><path d=\"M52 90 Q52 66 60 64 Q68 66 68 90 Q68 96 60 96 Q52 96 52 90 Z\" fill=\"#FFF4EA\"/><ellipse cx=\"60\" cy=\"80\" rx=\"18\" ry=\"7\" fill=\"#FFF4EA\"/><ellipse cx=\"55\" cy=\"62\" rx=\"7\" ry=\"6\" fill=\"#FFF4EA\"/><ellipse cx=\"65\" cy=\"60\" rx=\"6\" ry=\"5\" fill=\"#FFF4EA\"/><ellipse cx=\"60\" cy=\"72\" rx=\"16\" ry=\"6\" fill=\"#fff\" opacity=\"0.4\"/></g><path d=\"M50 258 Q48 250 49 230 L45 150 Q43 110 52 90 L54 62 Q54 54 60 54 Q66 54 66 62 L68 90 Q77 110 75 150 L71 230 Q72 250 70 258 Q65 262 60 262 Q55 262 50 258 Z\" fill=\"#fff\" opacity=\"0.05\"/><path d=\"M50 258 Q48 250 49 230 L45 150 Q43 110 52 90 L54 62 Q54 54 60 54 Q66 54 66 62 L68 90 Q77 110 75 150 L71 230 Q72 250 70 258 Q65 262 60 262 Q55 262 50 258 Z\" fill=\"none\" stroke=\"#fff\" stroke-opacity=\"0.55\" stroke-width=\"2.5\" stroke-linejoin=\"round\"/><path d=\"M54 84 Q50 160 58 250\" stroke=\"#fff\" stroke-opacity=\"0.34\" stroke-width=\"3\" fill=\"none\" stroke-linecap=\"round\"/></svg>"
+ },
+ "pre-wildraccoon-4": {
+  "_": "VFX · Wild Raccoon — scheda preparata (note dedotte da stile ed etichetta)",
+  "names": [
+   "vfx",
+   "vfx"
+  ],
+  "brew": "wildraccoon",
+  "word": "NZ IPA",
+  "acc": "#2FBFA8",
+  "ink": "#0B1012",
+  "note": "IPA con luppoli neozelandesi, in collaborazione con Piano B: uva bianca, frutta tropicale e lime, amaro deciso.",
+  "noteEn": "New Zealand-hopped IPA, brewed with Piano B: white grape, tropical fruit, lime, firm bitterness.",
+  "meters": [
+   4,
+   3,
+   5
+  ],
+  "chip": 3,
+  "ring": "VFX",
+  "tv": {
+   "glass": "nonic",
+   "liq": "#E9A12E",
+   "foam": "#FFF3DC",
+   "accent": "#2FBFA8",
+   "key": "uva bianca · tropicale · lime",
+   "keyEn": "white grape · tropical · lime"
+  },
+  "svg": "<svg viewBox=\"0 0 120 300\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\"><defs><linearGradient id=\"lg{ID}\" x1=\"0\" y1=\"0\" x2=\"1\" y2=\"0\"><stop offset=\"0\" stop-color=\"#fff\" stop-opacity=\"0.22\"/><stop offset=\"0.28\" stop-color=\"#fff\" stop-opacity=\"0\"/><stop offset=\"0.82\" stop-color=\"#F4C15A\" stop-opacity=\"0.55\"/></linearGradient><clipPath id=\"gc{ID}\"><path d=\"M44 50 L76 50 L74 92 Q82 96 80 106 L72 250 Q72 262 60 262 Q48 262 48 250 L40 106 Q38 96 46 92 Z\"/></clipPath></defs><ellipse cx=\"60\" cy=\"282\" rx=\"19\" ry=\"5\" fill=\"#fff\" opacity=\"0.28\"/><g clip-path=\"url(#gc{ID})\"><rect x=\"30\" y=\"70\" width=\"60\" height=\"200\" fill=\"#E9A12E\" opacity=\"0.97\"/><rect x=\"30\" y=\"70\" width=\"60\" height=\"200\" fill=\"url(#lg{ID})\"/><rect x=\"30\" y=\"70\" width=\"60\" height=\"200\" fill=\"#F4C15A\" opacity=\"0.30\"/><circle cx=\"57.3\" cy=\"233.3\" r=\"1.6\" fill=\"#fff\" opacity=\"0.32\"/><circle cx=\"61.5\" cy=\"147.8\" r=\"0.8\" fill=\"#fff\" opacity=\"0.19\"/><circle cx=\"74.5\" cy=\"159.1\" r=\"1.0\" fill=\"#fff\" opacity=\"0.31\"/><circle cx=\"60.3\" cy=\"227.7\" r=\"0.9\" fill=\"#fff\" opacity=\"0.29\"/><circle cx=\"68.6\" cy=\"158.8\" r=\"1.1\" fill=\"#fff\" opacity=\"0.22\"/><circle cx=\"51.2\" cy=\"199.1\" r=\"2.1\" fill=\"#fff\" opacity=\"0.32\"/><circle cx=\"58.8\" cy=\"234.5\" r=\"1.8\" fill=\"#fff\" opacity=\"0.35\"/><ellipse cx=\"60\" cy=\"70\" rx=\"16\" ry=\"6\" fill=\"#FFF3DC\"/><rect x=\"44\" y=\"62\" width=\"32\" height=\"10\" fill=\"#FFF3DC\"/><ellipse cx=\"60\" cy=\"62\" rx=\"16\" ry=\"5\" fill=\"#fff\" opacity=\"0.5\"/></g><path d=\"M44 50 L76 50 L74 92 Q82 96 80 106 L72 250 Q72 262 60 262 Q48 262 48 250 L40 106 Q38 96 46 92 Z\" fill=\"#fff\" opacity=\"0.05\"/><path d=\"M44 50 L76 50 L74 92 Q82 96 80 106 L72 250 Q72 262 60 262 Q48 262 48 250 L40 106 Q38 96 46 92 Z\" fill=\"none\" stroke=\"#fff\" stroke-opacity=\"0.55\" stroke-width=\"2.5\" stroke-linejoin=\"round\"/><path d=\"M48 56 L52 248\" stroke=\"#fff\" stroke-opacity=\"0.34\" stroke-width=\"3\" fill=\"none\" stroke-linecap=\"round\"/></svg>"
+ },
+ "pre-wildraccoon-5": {
+  "_": "5 Minute Window · Wild Raccoon — scheda preparata (note dedotte da stile ed etichetta)",
+  "names": [
+   "5minutewindow",
+   "fiveminutewindow",
+   "5minuteswindow"
+  ],
+  "brew": "wildraccoon",
+  "word": "West Coast IPA",
+  "acc": "#F5263A",
+  "ink": "#FFFDF4",
+  "note": "West Coast IPA secchissima con Simcoe, Mosaic e Citra: frutta tropicale, resina e pino, amaro deciso.",
+  "noteEn": "Bone-dry West Coast IPA with Simcoe, Mosaic and Citra: tropical fruit, resin and pine, firm bitterness.",
+  "meters": [
+   5,
+   2,
+   5
+  ],
+  "chip": 3,
+  "ring": "5 Minute Window",
+  "tv": {
+   "glass": "nonic",
+   "liq": "#E8A12A",
+   "foam": "#FBEBC8",
+   "accent": "#F5263A",
+   "key": "tropicale · resina · pino",
+   "keyEn": "tropical · resin · pine"
+  },
+  "svg": "<svg viewBox=\"0 0 120 300\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\"><defs><linearGradient id=\"lg{ID}\" x1=\"0\" y1=\"0\" x2=\"1\" y2=\"0\"><stop offset=\"0\" stop-color=\"#fff\" stop-opacity=\"0.22\"/><stop offset=\"0.28\" stop-color=\"#fff\" stop-opacity=\"0\"/><stop offset=\"0.82\" stop-color=\"#F2C04E\" stop-opacity=\"0.55\"/></linearGradient><clipPath id=\"gc{ID}\"><path d=\"M44 50 L76 50 L74 92 Q82 96 80 106 L72 250 Q72 262 60 262 Q48 262 48 250 L40 106 Q38 96 46 92 Z\"/></clipPath></defs><ellipse cx=\"60\" cy=\"282\" rx=\"19\" ry=\"5\" fill=\"#fff\" opacity=\"0.28\"/><g clip-path=\"url(#gc{ID})\"><rect x=\"30\" y=\"70\" width=\"60\" height=\"200\" fill=\"#E8A12A\" opacity=\"0.97\"/><rect x=\"30\" y=\"70\" width=\"60\" height=\"200\" fill=\"url(#lg{ID})\"/><rect x=\"30\" y=\"70\" width=\"60\" height=\"200\" fill=\"#F2C04E\" opacity=\"0.30\"/><circle cx=\"57.3\" cy=\"233.3\" r=\"1.6\" fill=\"#fff\" opacity=\"0.32\"/><circle cx=\"61.5\" cy=\"147.8\" r=\"0.8\" fill=\"#fff\" opacity=\"0.19\"/><circle cx=\"74.5\" cy=\"159.1\" r=\"1.0\" fill=\"#fff\" opacity=\"0.31\"/><circle cx=\"60.3\" cy=\"227.7\" r=\"0.9\" fill=\"#fff\" opacity=\"0.29\"/><circle cx=\"68.6\" cy=\"158.8\" r=\"1.1\" fill=\"#fff\" opacity=\"0.22\"/><circle cx=\"51.2\" cy=\"199.1\" r=\"2.1\" fill=\"#fff\" opacity=\"0.32\"/><circle cx=\"58.8\" cy=\"234.5\" r=\"1.8\" fill=\"#fff\" opacity=\"0.35\"/><ellipse cx=\"60\" cy=\"70\" rx=\"16\" ry=\"6\" fill=\"#FBEBC8\"/><rect x=\"44\" y=\"62\" width=\"32\" height=\"10\" fill=\"#FBEBC8\"/><ellipse cx=\"60\" cy=\"62\" rx=\"16\" ry=\"5\" fill=\"#fff\" opacity=\"0.5\"/></g><path d=\"M44 50 L76 50 L74 92 Q82 96 80 106 L72 250 Q72 262 60 262 Q48 262 48 250 L40 106 Q38 96 46 92 Z\" fill=\"#fff\" opacity=\"0.05\"/><path d=\"M44 50 L76 50 L74 92 Q82 96 80 106 L72 250 Q72 262 60 262 Q48 262 48 250 L40 106 Q38 96 46 92 Z\" fill=\"none\" stroke=\"#fff\" stroke-opacity=\"0.55\" stroke-width=\"2.5\" stroke-linejoin=\"round\"/><path d=\"M48 56 L52 248\" stroke=\"#fff\" stroke-opacity=\"0.34\" stroke-width=\"3\" fill=\"none\" stroke-linecap=\"round\"/></svg>"
+ },
+ "pre-wildraccoon-6": {
+  "_": "Theory of Running · Wild Raccoon — scheda preparata (note dedotte da stile ed etichetta)",
+  "names": [
+   "theoryofrunning",
+   "theoryofrunning"
+  ],
+  "brew": "wildraccoon",
+  "word": "India Pale Lager",
+  "acc": "#FF9E1B",
+  "ink": "#0B1012",
+  "note": "India pale lager: la pulizia di una lager con il profumo di una IPA, agrumata, fresca e secca.",
+  "noteEn": "India pale lager: lager crispness with IPA aroma, citrusy, fresh and dry.",
+  "meters": [
+   3,
+   2,
+   3
+  ],
+  "chip": 0,
+  "ring": "Theory of Running",
+  "tv": {
+   "glass": "pilsner",
+   "liq": "#F1C13A",
+   "foam": "#FFFBEA",
+   "accent": "#FF9E1B",
+   "key": "luppolata · fresca · secca",
+   "keyEn": "hoppy · crisp · dry"
+  },
+  "svg": "<svg viewBox=\"0 0 120 300\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\"><defs><linearGradient id=\"lg{ID}\" x1=\"0\" y1=\"0\" x2=\"1\" y2=\"0\"><stop offset=\"0\" stop-color=\"#fff\" stop-opacity=\"0.22\"/><stop offset=\"0.28\" stop-color=\"#fff\" stop-opacity=\"0\"/><stop offset=\"0.82\" stop-color=\"#F7D361\" stop-opacity=\"0.55\"/></linearGradient><clipPath id=\"gc{ID}\"><path d=\"M43 44 L77 44 L70 250 Q70 264 60 264 Q50 264 50 250 Z\"/></clipPath></defs><rect x=\"53\" y=\"264\" width=\"14\" height=\"18\" fill=\"#fff\" opacity=\"0.26\"/><ellipse cx=\"60\" cy=\"284\" rx=\"19\" ry=\"5\" fill=\"#fff\" opacity=\"0.30\"/><g clip-path=\"url(#gc{ID})\"><rect x=\"30\" y=\"64\" width=\"60\" height=\"210\" fill=\"#F1C13A\" opacity=\"0.92\"/><rect x=\"30\" y=\"64\" width=\"60\" height=\"210\" fill=\"url(#lg{ID})\"/><circle cx=\"59.7\" cy=\"174.7\" r=\"1.0\" fill=\"#fff\" opacity=\"0.21\"/><circle cx=\"58.3\" cy=\"165.1\" r=\"0.9\" fill=\"#fff\" opacity=\"0.34\"/><circle cx=\"62.7\" cy=\"148.3\" r=\"1.2\" fill=\"#fff\" opacity=\"0.32\"/><circle cx=\"64.7\" cy=\"89.5\" r=\"1.5\" fill=\"#fff\" opacity=\"0.21\"/><circle cx=\"65.2\" cy=\"103.8\" r=\"1.6\" fill=\"#fff\" opacity=\"0.26\"/><circle cx=\"50.3\" cy=\"84.8\" r=\"2.2\" fill=\"#fff\" opacity=\"0.35\"/><circle cx=\"48.6\" cy=\"154.2\" r=\"2.2\" fill=\"#fff\" opacity=\"0.20\"/><circle cx=\"57.6\" cy=\"172.9\" r=\"1.8\" fill=\"#fff\" opacity=\"0.22\"/><circle cx=\"50.1\" cy=\"249.5\" r=\"1.5\" fill=\"#fff\" opacity=\"0.21\"/><circle cx=\"61.4\" cy=\"134.1\" r=\"1.0\" fill=\"#fff\" opacity=\"0.31\"/><circle cx=\"55.6\" cy=\"137.6\" r=\"0.9\" fill=\"#fff\" opacity=\"0.35\"/><circle cx=\"52.2\" cy=\"231.6\" r=\"1.5\" fill=\"#fff\" opacity=\"0.21\"/><circle cx=\"63.1\" cy=\"146.7\" r=\"1.9\" fill=\"#fff\" opacity=\"0.29\"/><circle cx=\"49.1\" cy=\"115.4\" r=\"1.5\" fill=\"#fff\" opacity=\"0.18\"/><circle cx=\"46.4\" cy=\"148.6\" r=\"1.8\" fill=\"#fff\" opacity=\"0.29\"/><circle cx=\"73.7\" cy=\"133.2\" r=\"1.5\" fill=\"#fff\" opacity=\"0.26\"/><ellipse cx=\"60\" cy=\"64\" rx=\"17\" ry=\"7\" fill=\"#FFFBEA\"/><rect x=\"43\" y=\"56\" width=\"34\" height=\"10\" fill=\"#FFFBEA\"/><ellipse cx=\"60\" cy=\"56\" rx=\"17\" ry=\"6\" fill=\"#fff\" opacity=\"0.5\"/></g><path d=\"M43 44 L77 44 L70 250 Q70 264 60 264 Q50 264 50 250 Z\" fill=\"#fff\" opacity=\"0.05\"/><path d=\"M43 44 L77 44 L70 250 Q70 264 60 264 Q50 264 50 250 Z\" fill=\"none\" stroke=\"#fff\" stroke-opacity=\"0.55\" stroke-width=\"2.5\" stroke-linejoin=\"round\"/><path d=\"M46 50 L52 246\" stroke=\"#fff\" stroke-opacity=\"0.34\" stroke-width=\"3\" fill=\"none\" stroke-linecap=\"round\"/></svg>"
+ },
+ "pre-wildraccoon-7": {
+  "_": "Arctic Terror · Wild Raccoon — scheda preparata (note dedotte da stile ed etichetta)",
+  "names": [
+   "arcticterror"
+  ],
+  "brew": "wildraccoon",
+  "word": "Cold IPA",
+  "acc": "#2FBFA8",
+  "ink": "#0B1012",
+  "note": "Cold IPA senza glutine: limpida e molto secca, agrumi e frutta tropicale, amaro netto.",
+  "noteEn": "Gluten-free cold IPA: clear and very dry, citrus and tropical fruit, crisp bitterness.",
+  "meters": [
+   4,
+   2,
+   4
+  ],
+  "chip": 3,
+  "ring": "Arctic Terror",
+  "tv": {
+   "glass": "pilsner",
+   "liq": "#EDB83A",
+   "foam": "#FFF8E6",
+   "accent": "#2FBFA8",
+   "key": "senza glutine · agrumi · secca",
+   "keyEn": "gluten-free · citrus · dry"
+  },
+  "svg": "<svg viewBox=\"0 0 120 300\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\"><defs><linearGradient id=\"lg{ID}\" x1=\"0\" y1=\"0\" x2=\"1\" y2=\"0\"><stop offset=\"0\" stop-color=\"#fff\" stop-opacity=\"0.22\"/><stop offset=\"0.28\" stop-color=\"#fff\" stop-opacity=\"0\"/><stop offset=\"0.82\" stop-color=\"#F5D063\" stop-opacity=\"0.55\"/></linearGradient><clipPath id=\"gc{ID}\"><path d=\"M43 44 L77 44 L70 250 Q70 264 60 264 Q50 264 50 250 Z\"/></clipPath></defs><rect x=\"53\" y=\"264\" width=\"14\" height=\"18\" fill=\"#fff\" opacity=\"0.26\"/><ellipse cx=\"60\" cy=\"284\" rx=\"19\" ry=\"5\" fill=\"#fff\" opacity=\"0.30\"/><g clip-path=\"url(#gc{ID})\"><rect x=\"30\" y=\"64\" width=\"60\" height=\"210\" fill=\"#EDB83A\" opacity=\"0.92\"/><rect x=\"30\" y=\"64\" width=\"60\" height=\"210\" fill=\"url(#lg{ID})\"/><circle cx=\"59.7\" cy=\"174.7\" r=\"1.0\" fill=\"#fff\" opacity=\"0.21\"/><circle cx=\"58.3\" cy=\"165.1\" r=\"0.9\" fill=\"#fff\" opacity=\"0.34\"/><circle cx=\"62.7\" cy=\"148.3\" r=\"1.2\" fill=\"#fff\" opacity=\"0.32\"/><circle cx=\"64.7\" cy=\"89.5\" r=\"1.5\" fill=\"#fff\" opacity=\"0.21\"/><circle cx=\"65.2\" cy=\"103.8\" r=\"1.6\" fill=\"#fff\" opacity=\"0.26\"/><circle cx=\"50.3\" cy=\"84.8\" r=\"2.2\" fill=\"#fff\" opacity=\"0.35\"/><circle cx=\"48.6\" cy=\"154.2\" r=\"2.2\" fill=\"#fff\" opacity=\"0.20\"/><circle cx=\"57.6\" cy=\"172.9\" r=\"1.8\" fill=\"#fff\" opacity=\"0.22\"/><circle cx=\"50.1\" cy=\"249.5\" r=\"1.5\" fill=\"#fff\" opacity=\"0.21\"/><circle cx=\"61.4\" cy=\"134.1\" r=\"1.0\" fill=\"#fff\" opacity=\"0.31\"/><circle cx=\"55.6\" cy=\"137.6\" r=\"0.9\" fill=\"#fff\" opacity=\"0.35\"/><circle cx=\"52.2\" cy=\"231.6\" r=\"1.5\" fill=\"#fff\" opacity=\"0.21\"/><circle cx=\"63.1\" cy=\"146.7\" r=\"1.9\" fill=\"#fff\" opacity=\"0.29\"/><circle cx=\"49.1\" cy=\"115.4\" r=\"1.5\" fill=\"#fff\" opacity=\"0.18\"/><circle cx=\"46.4\" cy=\"148.6\" r=\"1.8\" fill=\"#fff\" opacity=\"0.29\"/><circle cx=\"73.7\" cy=\"133.2\" r=\"1.5\" fill=\"#fff\" opacity=\"0.26\"/><ellipse cx=\"60\" cy=\"64\" rx=\"17\" ry=\"7\" fill=\"#FFF8E6\"/><rect x=\"43\" y=\"56\" width=\"34\" height=\"10\" fill=\"#FFF8E6\"/><ellipse cx=\"60\" cy=\"56\" rx=\"17\" ry=\"6\" fill=\"#fff\" opacity=\"0.5\"/></g><path d=\"M43 44 L77 44 L70 250 Q70 264 60 264 Q50 264 50 250 Z\" fill=\"#fff\" opacity=\"0.05\"/><path d=\"M43 44 L77 44 L70 250 Q70 264 60 264 Q50 264 50 250 Z\" fill=\"none\" stroke=\"#fff\" stroke-opacity=\"0.55\" stroke-width=\"2.5\" stroke-linejoin=\"round\"/><path d=\"M46 50 L52 246\" stroke=\"#fff\" stroke-opacity=\"0.34\" stroke-width=\"3\" fill=\"none\" stroke-linecap=\"round\"/></svg>"
+ },
+ "pre-return-1": {
+  "_": "Pilsner Urquell — scheda PIVO da pivo-data.js",
+  "names": [
+   "pilsnerurquell"
+  ],
+  "brew": "plzenskyprazdroj",
+  "word": "Czech Pilsner",
+  "acc": "#FF9E1B",
+  "ink": "#0B1012",
+  "note": "La pils ceca originale: malto dorato, un tocco di caramello, Saaz floreale e amaro deciso e pulito.",
+  "noteEn": "The original Czech pils: golden malt, a touch of caramel, floral Saaz, crisp clean bitterness.",
+  "meters": [
+   3,
+   2,
+   3
+  ],
+  "chip": 0,
+  "ring": "Pilsner Urquell",
+  "tv": {
+   "glass": "pilsner",
+   "liq": "#F1C13A",
+   "foam": "#FFFBEA",
+   "accent": "#FF9E1B",
+   "key": "malto dorato · Saaz · secca",
+   "keyEn": "golden malt · Saaz · crisp"
+  },
+  "svg": "<svg viewBox=\"0 0 120 300\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\"><defs><linearGradient id=\"lg{ID}\" x1=\"0\" y1=\"0\" x2=\"1\" y2=\"0\"><stop offset=\"0\" stop-color=\"#fff\" stop-opacity=\"0.22\"/><stop offset=\"0.28\" stop-color=\"#fff\" stop-opacity=\"0\"/><stop offset=\"0.82\" stop-color=\"#F7D361\" stop-opacity=\"0.55\"/></linearGradient><clipPath id=\"gc{ID}\"><path d=\"M43 44 L77 44 L70 250 Q70 264 60 264 Q50 264 50 250 Z\"/></clipPath></defs><rect x=\"53\" y=\"264\" width=\"14\" height=\"18\" fill=\"#fff\" opacity=\"0.26\"/><ellipse cx=\"60\" cy=\"284\" rx=\"19\" ry=\"5\" fill=\"#fff\" opacity=\"0.30\"/><g clip-path=\"url(#gc{ID})\"><rect x=\"30\" y=\"64\" width=\"60\" height=\"210\" fill=\"#F1C13A\" opacity=\"0.92\"/><rect x=\"30\" y=\"64\" width=\"60\" height=\"210\" fill=\"url(#lg{ID})\"/><circle cx=\"59.7\" cy=\"174.7\" r=\"1.0\" fill=\"#fff\" opacity=\"0.21\"/><circle cx=\"58.3\" cy=\"165.1\" r=\"0.9\" fill=\"#fff\" opacity=\"0.34\"/><circle cx=\"62.7\" cy=\"148.3\" r=\"1.2\" fill=\"#fff\" opacity=\"0.32\"/><circle cx=\"64.7\" cy=\"89.5\" r=\"1.5\" fill=\"#fff\" opacity=\"0.21\"/><circle cx=\"65.2\" cy=\"103.8\" r=\"1.6\" fill=\"#fff\" opacity=\"0.26\"/><circle cx=\"50.3\" cy=\"84.8\" r=\"2.2\" fill=\"#fff\" opacity=\"0.35\"/><circle cx=\"48.6\" cy=\"154.2\" r=\"2.2\" fill=\"#fff\" opacity=\"0.20\"/><circle cx=\"57.6\" cy=\"172.9\" r=\"1.8\" fill=\"#fff\" opacity=\"0.22\"/><circle cx=\"50.1\" cy=\"249.5\" r=\"1.5\" fill=\"#fff\" opacity=\"0.21\"/><circle cx=\"61.4\" cy=\"134.1\" r=\"1.0\" fill=\"#fff\" opacity=\"0.31\"/><circle cx=\"55.6\" cy=\"137.6\" r=\"0.9\" fill=\"#fff\" opacity=\"0.35\"/><circle cx=\"52.2\" cy=\"231.6\" r=\"1.5\" fill=\"#fff\" opacity=\"0.21\"/><circle cx=\"63.1\" cy=\"146.7\" r=\"1.9\" fill=\"#fff\" opacity=\"0.29\"/><circle cx=\"49.1\" cy=\"115.4\" r=\"1.5\" fill=\"#fff\" opacity=\"0.18\"/><circle cx=\"46.4\" cy=\"148.6\" r=\"1.8\" fill=\"#fff\" opacity=\"0.29\"/><circle cx=\"73.7\" cy=\"133.2\" r=\"1.5\" fill=\"#fff\" opacity=\"0.26\"/><ellipse cx=\"60\" cy=\"64\" rx=\"17\" ry=\"7\" fill=\"#FFFBEA\"/><rect x=\"43\" y=\"56\" width=\"34\" height=\"10\" fill=\"#FFFBEA\"/><ellipse cx=\"60\" cy=\"56\" rx=\"17\" ry=\"6\" fill=\"#fff\" opacity=\"0.5\"/></g><path d=\"M43 44 L77 44 L70 250 Q70 264 60 264 Q50 264 50 250 Z\" fill=\"#fff\" opacity=\"0.05\"/><path d=\"M43 44 L77 44 L70 250 Q70 264 60 264 Q50 264 50 250 Z\" fill=\"none\" stroke=\"#fff\" stroke-opacity=\"0.55\" stroke-width=\"2.5\" stroke-linejoin=\"round\"/><path d=\"M46 50 L52 246\" stroke=\"#fff\" stroke-opacity=\"0.34\" stroke-width=\"3\" fill=\"none\" stroke-linecap=\"round\"/></svg>"
+ }
+};
+
+/* ---------- regole per stile (birre senza scheda) — la prima che combacia - */
+var PIVO_STYLE_RULES=[
+ {
+  "id": "imperial stout",
+  "match": [
+   "imperialstout",
+   "russianimperial",
+   "barleywine",
+   "barleywine",
+   "imperialporter",
+   "balticporter"
+  ],
+  "glass": "snifter",
+  "liq": "#120a05",
+  "liq2": "#2a170c",
+  "foam": "#a8774a",
+  "tvGlass": "snifter",
+  "tvLiq": "#2A170C",
+  "tvFoam": "#B8895A",
+  "tvAccent": "#FFC24B",
+  "acc": "#5A3520",
+  "ink": "#FFFDF4",
+  "meters": [
+   3,
+   5,
+   5
+  ],
+  "chip": 4,
+  "key": "cacao · caffè · frutta scura",
+  "note": "Stout imperiale potente: cacao, caffè tostato e frutta scura, corpo pieno e finale caldo.",
+  "noteEn": "Big imperial stout: cocoa, roasted coffee, dark fruit, full body, warm finish.",
+  "word": "Imperial Stout",
+  "keyEn": "cocoa · coffee · dark fruit"
+ },
+ {
+  "id": "stout / porter",
+  "match": [
+   "stout",
+   "porter",
+   "schwarz"
+  ],
+  "glass": "snifter",
+  "liq": "#1a0e08",
+  "liq2": "#3a2113",
+  "foam": "#d8b483",
+  "tvGlass": "snifter",
+  "tvLiq": "#3B2116",
+  "tvFoam": "#E4C79A",
+  "tvAccent": "#F5263A",
+  "acc": "#182124",
+  "ink": "#FFFDF4",
+  "meters": [
+   3,
+   4,
+   3
+  ],
+  "chip": 7,
+  "key": "caffè · cacao · tostata",
+  "note": "Birra scura e tostata: caffè, cacao e malto torrefatto, finale secco.",
+  "noteEn": "Dark, roasty beer: coffee, cocoa and roasted malt, dry finish.",
+  "word": null,
+  "keyEn": "coffee · cocoa · roasty"
+ },
+ {
+  "id": "sour / gose",
+  "match": [
+   "gose",
+   "sour",
+   "berliner",
+   "lambic",
+   "gueuze",
+   "geuze",
+   "kriek",
+   "framboise",
+   "wildale",
+   "brett",
+   "flanders"
+  ],
+  "glass": "weizen",
+  "liq": "#F3DC8E",
+  "liq2": "#F6DE84",
+  "foam": "#FFFDF4",
+  "tvGlass": "weizen",
+  "tvLiq": "#F3DC8E",
+  "tvFoam": "#FFFDF4",
+  "tvAccent": "#FF9E1B",
+  "acc": "#FF9E1B",
+  "ink": "#0B1012",
+  "meters": [
+   1,
+   1,
+   4
+  ],
+  "chip": 1,
+  "key": "acidula · fresca · fruttata",
+  "note": "Birra acidula e dissetante: freschezza agrumata e finale vivace.",
+  "noteEn": "Tart, refreshing beer: zesty freshness and a lively finish.",
+  "word": null,
+  "keyEn": "tart · fresh · fruity"
+ },
+ {
+  "id": "new england ipa",
+  "match": [
+   "newengland",
+   "neipa",
+   "hazy",
+   "juicy"
+  ],
+  "glass": "nonic",
+  "liq": "#E4A83C",
+  "liq2": "#F3D27C",
+  "foam": "#FCEFD0",
+  "tvGlass": "nonic",
+  "tvLiq": "#E89A2E",
+  "tvFoam": "#FFF3DC",
+  "tvAccent": "#FFC24B",
+  "acc": "#FFC24B",
+  "ink": "#0B1012",
+  "meters": [
+   2,
+   3,
+   5
+  ],
+  "chip": 3,
+  "key": "tropicale · agrumi · morbida",
+  "note": "IPA torbida e succosa: frutta tropicale e agrumi, amaro morbido.",
+  "noteEn": "Hazy, juicy IPA: tropical fruit and citrus, soft bitterness.",
+  "word": "New England IPA",
+  "keyEn": "tropical · citrus · soft"
+ },
+ {
+  "id": "double ipa",
+  "match": [
+   "doubleipa",
+   "dipa",
+   "imperialipa",
+   "tripleipa"
+  ],
+  "glass": "nonic",
+  "liq": "#E28C12",
+  "liq2": "#F0A828",
+  "foam": "#FBEBC8",
+  "tvGlass": "nonic",
+  "tvLiq": "#E58A22",
+  "tvFoam": "#FFF1DA",
+  "tvAccent": "#2FBFA8",
+  "acc": "#2FBFA8",
+  "ink": "#0B1012",
+  "meters": [
+   5,
+   4,
+   5
+  ],
+  "chip": 3,
+  "key": "resina · agrumi · potente",
+  "note": "Double IPA potente: resina, agrumi maturi e malto a bilanciare, amaro pieno.",
+  "noteEn": "Big double IPA: resin, ripe citrus, balancing malt, full bitterness.",
+  "word": "Double IPA",
+  "keyEn": "resin · citrus · bold"
+ },
+ {
+  "id": "ipa / pale ale",
+  "match": [
+   "ipa",
+   "paleale",
+   "apa",
+   "india",
+   "hoppy"
+  ],
+  "glass": "nonic",
+  "liq": "#E28C12",
+  "liq2": "#F0A828",
+  "foam": "#FBEBC8",
+  "tvGlass": "nonic",
+  "tvLiq": "#E58A22",
+  "tvFoam": "#FFF1DA",
+  "tvAccent": "#2FBFA8",
+  "acc": "#2FBFA8",
+  "ink": "#0B1012",
+  "meters": [
+   4,
+   3,
+   4
+  ],
+  "chip": 3,
+  "key": "luppolata · agrumi · resina",
+  "note": "Birra luppolata: agrumi e resina, amaro deciso e finale secco.",
+  "noteEn": "Hoppy beer: citrus and resin, firm bitterness, dry finish.",
+  "word": null,
+  "keyEn": "hoppy · citrus · resin"
+ },
+ {
+  "id": "saison",
+  "match": [
+   "saison",
+   "farmhouse",
+   "grisette"
+  ],
+  "glass": "tulip",
+  "liq": "#EDBE4A",
+  "liq2": "#F3C142",
+  "foam": "#FCF0D2",
+  "tvGlass": "tulip",
+  "tvLiq": "#EDBE4A",
+  "tvFoam": "#FFFBF0",
+  "tvAccent": "#FFC24B",
+  "acc": "#FFC24B",
+  "ink": "#0B1012",
+  "meters": [
+   3,
+   2,
+   4
+  ],
+  "chip": 6,
+  "key": "secca · speziata · fruttata",
+  "note": "Saison secca e speziata: pepe, agrumi e lievito, finale asciutto.",
+  "noteEn": "Dry, spicy saison: pepper, citrus and yeast, crisp finish.",
+  "word": "Saison",
+  "keyEn": "dry · spicy · fruity"
+ },
+ {
+  "id": "belgian dark",
+  "match": [
+   "dubbel",
+   "quadrupel",
+   "quad",
+   "belgiandark",
+   "strongdark",
+   "brune"
+  ],
+  "glass": "tulip",
+  "liq": "#7A3F1C",
+  "liq2": "#A05827",
+  "foam": "#E9CFA4",
+  "tvGlass": "tulip",
+  "tvLiq": "#7A3F1C",
+  "tvFoam": "#E9CFA4",
+  "tvAccent": "#F5263A",
+  "acc": "#F5263A",
+  "ink": "#FFFDF4",
+  "meters": [
+   2,
+   4,
+   4
+  ],
+  "chip": 5,
+  "key": "frutta scura · caramello · spezie",
+  "note": "Belga scura e calda: frutta secca, caramello e spezie del lievito.",
+  "noteEn": "Warm dark Belgian ale: dried fruit, caramel and yeasty spice.",
+  "word": null,
+  "keyEn": "dark fruit · caramel · spice"
+ },
+ {
+  "id": "belgian blond / tripel",
+  "match": [
+   "tripel",
+   "belgian",
+   "blond",
+   "strongale",
+   "abbey",
+   "abbaye",
+   "trappist"
+  ],
+  "glass": "tulip",
+  "liq": "#EDBE4A",
+  "liq2": "#F3C142",
+  "foam": "#FCF0D2",
+  "tvGlass": "tulip",
+  "tvLiq": "#E8B83E",
+  "tvFoam": "#FFFBF0",
+  "tvAccent": "#2FBFA8",
+  "acc": "#2FBFA8",
+  "ink": "#0B1012",
+  "meters": [
+   2,
+   3,
+   3
+  ],
+  "chip": 2,
+  "key": "frutta gialla · spezie · secca",
+  "note": "Birra belga dorata: malto morbido, frutta gialla e spezie lievi, finale secco.",
+  "noteEn": "Golden Belgian ale: soft malt, stone fruit, gentle spice, dry finish.",
+  "word": null,
+  "keyEn": "stone fruit · spice · dry"
+ },
+ {
+  "id": "weizen / blanche",
+  "match": [
+   "weizen",
+   "weiss",
+   "hefe",
+   "wheat",
+   "blanche",
+   "witbier",
+   "frumento"
+  ],
+  "glass": "weizen",
+  "liq": "#F0D98A",
+  "liq2": "#F6DE84",
+  "foam": "#FFFDF4",
+  "tvGlass": "weizen",
+  "tvLiq": "#F0D98A",
+  "tvFoam": "#FFFDF4",
+  "tvAccent": "#2FBFA8",
+  "acc": "#2FBFA8",
+  "ink": "#0B1012",
+  "meters": [
+   1,
+   2,
+   4
+  ],
+  "chip": 2,
+  "key": "frumento · agrumi · morbida",
+  "note": "Birra di frumento morbida e rinfrescante: note fruttate e speziate.",
+  "noteEn": "Soft, refreshing wheat beer: fruity and spicy notes.",
+  "word": null,
+  "keyEn": "wheat · citrus · soft"
+ },
+ {
+  "id": "maltata / ambrata",
+  "match": [
+   "marzen",
+   "oktoberfest",
+   "festbier",
+   "bock",
+   "vienna",
+   "amber",
+   "ambrata",
+   "rossa",
+   "redale",
+   "dunkel",
+   "brown",
+   "bitter",
+   "scotch",
+   "rauch",
+   "altbier"
+  ],
+  "glass": "tulip",
+  "liq": "#C8741E",
+  "liq2": "#E8A33A",
+  "foam": "#F3DDB4",
+  "tvGlass": "tulip",
+  "tvLiq": "#C8741E",
+  "tvFoam": "#F3DDB4",
+  "tvAccent": "#F5263A",
+  "acc": "#F5263A",
+  "ink": "#FFFDF4",
+  "meters": [
+   2,
+   4,
+   3
+  ],
+  "chip": 5,
+  "key": "crosta di pane · caramello",
+  "note": "Birra maltata e ambrata: crosta di pane e caramello, finale morbido.",
+  "noteEn": "Malty amber beer: bread crust and caramel, smooth finish.",
+  "word": null,
+  "keyEn": "bread crust · caramel"
+ },
+ {
+  "id": "pils / lager",
+  "match": [
+   "pils",
+   "lager",
+   "helles",
+   "keller",
+   "kolsch",
+   "export",
+   "dortmunder",
+   "zwickel",
+   "session"
+  ],
+  "glass": "pilsner",
+  "liq": "#F1C13A",
+  "liq2": "#F7D361",
+  "foam": "#FFFBEA",
+  "tvGlass": "pilsner",
+  "tvLiq": "#F0B429",
+  "tvFoam": "#FFF6E3",
+  "tvAccent": "#FF9E1B",
+  "acc": "#FF9E1B",
+  "ink": "#0B1012",
+  "meters": [
+   3,
+   2,
+   2
+  ],
+  "chip": 0,
+  "key": "secca · erbacea · pulita",
+  "note": "Bassa fermentazione chiara e pulita: cereale, luppolo erbaceo, finale secco.",
+  "noteEn": "Clean pale lager: grainy malt, herbal hops, crisp dry finish.",
+  "word": null,
+  "keyEn": "dry · herbal · clean"
+ },
+ {
+  "id": "altro (nessuna regola)",
+  "match": [],
+  "glass": "tulip",
+  "liq": "#E8B83E",
+  "liq2": "#F3C142",
+  "foam": "#FCF0D2",
+  "tvGlass": "tulip",
+  "tvLiq": "#E8B83E",
+  "tvFoam": "#FFFBF0",
+  "tvAccent": "#FFC24B",
+  "acc": "#FFC24B",
+  "ink": "#0B1012",
+  "meters": [
+   3,
+   3,
+   3
+  ],
+  "chip": 0,
+  "key": "",
+  "note": "Nuova alla spina: chiedi al banco un assaggio.",
+  "noteEn": "New on tap: ask the bar for a taste.",
+  "word": null,
+  "keyEn": ""
+ }
+];
+
+/* ---------- bicchieri del menu (stessi disegni delle schede attuali) ------ */
+var GLASS_TPL={
+ "pilsner": "<svg viewBox=\"0 0 120 300\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\"><defs><linearGradient id=\"lg{ID}\" x1=\"0\" y1=\"0\" x2=\"1\" y2=\"0\"><stop offset=\"0\" stop-color=\"#fff\" stop-opacity=\"0.22\"/><stop offset=\"0.28\" stop-color=\"#fff\" stop-opacity=\"0\"/><stop offset=\"0.82\" stop-color=\"{LIQ2}\" stop-opacity=\"0.55\"/></linearGradient><clipPath id=\"gc{ID}\"><path d=\"M43 44 L77 44 L70 250 Q70 264 60 264 Q50 264 50 250 Z\"/></clipPath></defs><rect x=\"53\" y=\"264\" width=\"14\" height=\"18\" fill=\"#fff\" opacity=\"0.26\"/><ellipse cx=\"60\" cy=\"284\" rx=\"19\" ry=\"5\" fill=\"#fff\" opacity=\"0.30\"/><g clip-path=\"url(#gc{ID})\"><rect x=\"30\" y=\"64\" width=\"60\" height=\"210\" fill=\"{LIQ}\" opacity=\"0.92\"/><rect x=\"30\" y=\"64\" width=\"60\" height=\"210\" fill=\"url(#lg{ID})\"/><circle cx=\"59.7\" cy=\"174.7\" r=\"1.0\" fill=\"#fff\" opacity=\"0.21\"/><circle cx=\"58.3\" cy=\"165.1\" r=\"0.9\" fill=\"#fff\" opacity=\"0.34\"/><circle cx=\"62.7\" cy=\"148.3\" r=\"1.2\" fill=\"#fff\" opacity=\"0.32\"/><circle cx=\"64.7\" cy=\"89.5\" r=\"1.5\" fill=\"#fff\" opacity=\"0.21\"/><circle cx=\"65.2\" cy=\"103.8\" r=\"1.6\" fill=\"#fff\" opacity=\"0.26\"/><circle cx=\"50.3\" cy=\"84.8\" r=\"2.2\" fill=\"#fff\" opacity=\"0.35\"/><circle cx=\"48.6\" cy=\"154.2\" r=\"2.2\" fill=\"#fff\" opacity=\"0.20\"/><circle cx=\"57.6\" cy=\"172.9\" r=\"1.8\" fill=\"#fff\" opacity=\"0.22\"/><circle cx=\"50.1\" cy=\"249.5\" r=\"1.5\" fill=\"#fff\" opacity=\"0.21\"/><circle cx=\"61.4\" cy=\"134.1\" r=\"1.0\" fill=\"#fff\" opacity=\"0.31\"/><circle cx=\"55.6\" cy=\"137.6\" r=\"0.9\" fill=\"#fff\" opacity=\"0.35\"/><circle cx=\"52.2\" cy=\"231.6\" r=\"1.5\" fill=\"#fff\" opacity=\"0.21\"/><circle cx=\"63.1\" cy=\"146.7\" r=\"1.9\" fill=\"#fff\" opacity=\"0.29\"/><circle cx=\"49.1\" cy=\"115.4\" r=\"1.5\" fill=\"#fff\" opacity=\"0.18\"/><circle cx=\"46.4\" cy=\"148.6\" r=\"1.8\" fill=\"#fff\" opacity=\"0.29\"/><circle cx=\"73.7\" cy=\"133.2\" r=\"1.5\" fill=\"#fff\" opacity=\"0.26\"/><ellipse cx=\"60\" cy=\"64\" rx=\"17\" ry=\"7\" fill=\"{FOAM}\"/><rect x=\"43\" y=\"56\" width=\"34\" height=\"10\" fill=\"{FOAM}\"/><ellipse cx=\"60\" cy=\"56\" rx=\"17\" ry=\"6\" fill=\"#fff\" opacity=\"0.5\"/></g><path d=\"M43 44 L77 44 L70 250 Q70 264 60 264 Q50 264 50 250 Z\" fill=\"#fff\" opacity=\"0.05\"/><path d=\"M43 44 L77 44 L70 250 Q70 264 60 264 Q50 264 50 250 Z\" fill=\"none\" stroke=\"#fff\" stroke-opacity=\"0.55\" stroke-width=\"2.5\" stroke-linejoin=\"round\"/><path d=\"M46 50 L52 246\" stroke=\"#fff\" stroke-opacity=\"0.34\" stroke-width=\"3\" fill=\"none\" stroke-linecap=\"round\"/></svg>",
+ "tulip": "<svg viewBox=\"0 0 120 300\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\"><defs><linearGradient id=\"lg{ID}\" x1=\"0\" y1=\"0\" x2=\"1\" y2=\"0\"><stop offset=\"0\" stop-color=\"#fff\" stop-opacity=\"0.22\"/><stop offset=\"0.28\" stop-color=\"#fff\" stop-opacity=\"0\"/><stop offset=\"0.82\" stop-color=\"{LIQ2}\" stop-opacity=\"0.55\"/></linearGradient><clipPath id=\"gc{ID}\"><path d=\"M44 96 Q32 62 48 52 L72 52 Q88 62 76 96 Q90 148 60 166 Q30 148 44 96 Z\"/></clipPath></defs><rect x=\"56\" y=\"166\" width=\"8\" height=\"24\" fill=\"#fff\" opacity=\"0.28\"/><ellipse cx=\"60\" cy=\"196\" rx=\"21\" ry=\"6\" fill=\"#fff\" opacity=\"0.30\"/><g clip-path=\"url(#gc{ID})\"><rect x=\"24\" y=\"68\" width=\"72\" height=\"110\" fill=\"{LIQ}\" opacity=\"0.94\"/><rect x=\"24\" y=\"68\" width=\"72\" height=\"110\" fill=\"url(#lg{ID})\"/><circle cx=\"64.5\" cy=\"154.4\" r=\"1.2\" fill=\"#fff\" opacity=\"0.18\"/><circle cx=\"51.8\" cy=\"142.8\" r=\"1.1\" fill=\"#fff\" opacity=\"0.23\"/><circle cx=\"69.1\" cy=\"109.1\" r=\"1.7\" fill=\"#fff\" opacity=\"0.33\"/><circle cx=\"73.6\" cy=\"123.5\" r=\"1.2\" fill=\"#fff\" opacity=\"0.25\"/><circle cx=\"58.3\" cy=\"128.7\" r=\"1.2\" fill=\"#fff\" opacity=\"0.32\"/><circle cx=\"48.5\" cy=\"144.4\" r=\"0.9\" fill=\"#fff\" opacity=\"0.22\"/><circle cx=\"58.2\" cy=\"125.3\" r=\"1.7\" fill=\"#fff\" opacity=\"0.29\"/><circle cx=\"67.1\" cy=\"111.7\" r=\"2.1\" fill=\"#fff\" opacity=\"0.17\"/><circle cx=\"46.9\" cy=\"114.6\" r=\"2.1\" fill=\"#fff\" opacity=\"0.18\"/><circle cx=\"68.4\" cy=\"133.0\" r=\"2.1\" fill=\"#fff\" opacity=\"0.23\"/><circle cx=\"68.0\" cy=\"145.1\" r=\"1.7\" fill=\"#fff\" opacity=\"0.29\"/><circle cx=\"54.1\" cy=\"152.9\" r=\"2.0\" fill=\"#fff\" opacity=\"0.32\"/><ellipse cx=\"60\" cy=\"68\" rx=\"20\" ry=\"7\" fill=\"{FOAM}\"/><rect x=\"40\" y=\"60\" width=\"40\" height=\"10\" fill=\"{FOAM}\"/><ellipse cx=\"60\" cy=\"60\" rx=\"20\" ry=\"6\" fill=\"#fff\" opacity=\"0.5\"/></g><path d=\"M44 96 Q32 62 48 52 L72 52 Q88 62 76 96 Q90 148 60 166 Q30 148 44 96 Z\" fill=\"#fff\" opacity=\"0.05\"/><path d=\"M44 96 Q32 62 48 52 L72 52 Q88 62 76 96 Q90 148 60 166 Q30 148 44 96 Z\" fill=\"none\" stroke=\"#fff\" stroke-opacity=\"0.55\" stroke-width=\"2.5\" stroke-linejoin=\"round\"/><path d=\"M48 60 Q42 100 52 150\" stroke=\"#fff\" stroke-opacity=\"0.34\" stroke-width=\"3\" fill=\"none\" stroke-linecap=\"round\"/></svg>",
+ "nonic": "<svg viewBox=\"0 0 120 300\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\"><defs><linearGradient id=\"lg{ID}\" x1=\"0\" y1=\"0\" x2=\"1\" y2=\"0\"><stop offset=\"0\" stop-color=\"#fff\" stop-opacity=\"0.22\"/><stop offset=\"0.28\" stop-color=\"#fff\" stop-opacity=\"0\"/><stop offset=\"0.82\" stop-color=\"{LIQ2}\" stop-opacity=\"0.55\"/></linearGradient><clipPath id=\"gc{ID}\"><path d=\"M44 50 L76 50 L74 92 Q82 96 80 106 L72 250 Q72 262 60 262 Q48 262 48 250 L40 106 Q38 96 46 92 Z\"/></clipPath></defs><ellipse cx=\"60\" cy=\"282\" rx=\"19\" ry=\"5\" fill=\"#fff\" opacity=\"0.28\"/><g clip-path=\"url(#gc{ID})\"><rect x=\"30\" y=\"70\" width=\"60\" height=\"200\" fill=\"{LIQ}\" opacity=\"0.97\"/><rect x=\"30\" y=\"70\" width=\"60\" height=\"200\" fill=\"url(#lg{ID})\"/><rect x=\"30\" y=\"70\" width=\"60\" height=\"200\" fill=\"{LIQ2}\" opacity=\"0.30\"/><circle cx=\"57.3\" cy=\"233.3\" r=\"1.6\" fill=\"#fff\" opacity=\"0.32\"/><circle cx=\"61.5\" cy=\"147.8\" r=\"0.8\" fill=\"#fff\" opacity=\"0.19\"/><circle cx=\"74.5\" cy=\"159.1\" r=\"1.0\" fill=\"#fff\" opacity=\"0.31\"/><circle cx=\"60.3\" cy=\"227.7\" r=\"0.9\" fill=\"#fff\" opacity=\"0.29\"/><circle cx=\"68.6\" cy=\"158.8\" r=\"1.1\" fill=\"#fff\" opacity=\"0.22\"/><circle cx=\"51.2\" cy=\"199.1\" r=\"2.1\" fill=\"#fff\" opacity=\"0.32\"/><circle cx=\"58.8\" cy=\"234.5\" r=\"1.8\" fill=\"#fff\" opacity=\"0.35\"/><ellipse cx=\"60\" cy=\"70\" rx=\"16\" ry=\"6\" fill=\"{FOAM}\"/><rect x=\"44\" y=\"62\" width=\"32\" height=\"10\" fill=\"{FOAM}\"/><ellipse cx=\"60\" cy=\"62\" rx=\"16\" ry=\"5\" fill=\"#fff\" opacity=\"0.5\"/></g><path d=\"M44 50 L76 50 L74 92 Q82 96 80 106 L72 250 Q72 262 60 262 Q48 262 48 250 L40 106 Q38 96 46 92 Z\" fill=\"#fff\" opacity=\"0.05\"/><path d=\"M44 50 L76 50 L74 92 Q82 96 80 106 L72 250 Q72 262 60 262 Q48 262 48 250 L40 106 Q38 96 46 92 Z\" fill=\"none\" stroke=\"#fff\" stroke-opacity=\"0.55\" stroke-width=\"2.5\" stroke-linejoin=\"round\"/><path d=\"M48 56 L52 248\" stroke=\"#fff\" stroke-opacity=\"0.34\" stroke-width=\"3\" fill=\"none\" stroke-linecap=\"round\"/></svg>",
+ "snifter": "<svg viewBox=\"0 0 120 300\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\"><defs><linearGradient id=\"lg{ID}\" x1=\"0\" y1=\"0\" x2=\"1\" y2=\"0\"><stop offset=\"0\" stop-color=\"#fff\" stop-opacity=\"0.22\"/><stop offset=\"0.28\" stop-color=\"#fff\" stop-opacity=\"0\"/><stop offset=\"0.82\" stop-color=\"{LIQ2}\" stop-opacity=\"0.55\"/></linearGradient><clipPath id=\"gc{ID}\"><path d=\"M42 98 Q34 60 60 56 Q86 60 78 98 Q90 142 60 158 Q30 142 42 98 Z\"/></clipPath></defs><rect x=\"56\" y=\"158\" width=\"8\" height=\"22\" fill=\"#fff\" opacity=\"0.28\"/><ellipse cx=\"60\" cy=\"186\" rx=\"22\" ry=\"6\" fill=\"#fff\" opacity=\"0.30\"/><g clip-path=\"url(#gc{ID})\"><rect x=\"22\" y=\"74\" width=\"76\" height=\"92\" fill=\"{LIQ}\" opacity=\"1.0\"/><rect x=\"22\" y=\"74\" width=\"76\" height=\"92\" fill=\"url(#lg{ID})\"/><circle cx=\"66.9\" cy=\"125.2\" r=\"2.1\" fill=\"#fff\" opacity=\"0.27\"/><circle cx=\"48.6\" cy=\"146.3\" r=\"1.2\" fill=\"#fff\" opacity=\"0.17\"/><circle cx=\"57.3\" cy=\"106.6\" r=\"2.0\" fill=\"#fff\" opacity=\"0.33\"/><circle cx=\"48.0\" cy=\"136.3\" r=\"1.8\" fill=\"#fff\" opacity=\"0.17\"/><circle cx=\"54.9\" cy=\"106.2\" r=\"1.7\" fill=\"#fff\" opacity=\"0.35\"/><ellipse cx=\"60\" cy=\"74\" rx=\"21\" ry=\"7\" fill=\"{FOAM}\"/><rect x=\"40\" y=\"67\" width=\"40\" height=\"9\" fill=\"{FOAM}\"/><ellipse cx=\"60\" cy=\"67\" rx=\"21\" ry=\"5\" fill=\"#fff\" opacity=\"0.5\"/></g><path d=\"M42 98 Q34 60 60 56 Q86 60 78 98 Q90 142 60 158 Q30 142 42 98 Z\" fill=\"#fff\" opacity=\"0.05\"/><path d=\"M42 98 Q34 60 60 56 Q86 60 78 98 Q90 142 60 158 Q30 142 42 98 Z\" fill=\"none\" stroke=\"#fff\" stroke-opacity=\"0.55\" stroke-width=\"2.5\" stroke-linejoin=\"round\"/><path d=\"M46 66 Q38 100 50 140\" stroke=\"#fff\" stroke-opacity=\"0.34\" stroke-width=\"3\" fill=\"none\" stroke-linecap=\"round\"/></svg>",
+ "weizen": "<svg viewBox=\"0 0 120 300\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\"><defs><linearGradient id=\"lg{ID}\" x1=\"0\" y1=\"0\" x2=\"1\" y2=\"0\"><stop offset=\"0\" stop-color=\"#fff\" stop-opacity=\"0.22\"/><stop offset=\"0.28\" stop-color=\"#fff\" stop-opacity=\"0\"/><stop offset=\"0.82\" stop-color=\"{LIQ2}\" stop-opacity=\"0.55\"/></linearGradient><clipPath id=\"gc{ID}\"><path d=\"M50 258 Q48 250 49 230 L45 150 Q43 110 52 90 L54 62 Q54 54 60 54 Q66 54 66 62 L68 90 Q77 110 75 150 L71 230 Q72 250 70 258 Q65 262 60 262 Q55 262 50 258 Z\"/></clipPath></defs><rect x=\"55\" y=\"262\" width=\"10\" height=\"16\" fill=\"#fff\" opacity=\"0.26\"/><ellipse cx=\"60\" cy=\"280\" rx=\"17\" ry=\"5\" fill=\"#fff\" opacity=\"0.28\"/><g clip-path=\"url(#gc{ID})\"><rect x=\"40\" y=\"80\" width=\"40\" height=\"184\" fill=\"{LIQ}\" opacity=\"0.82\"/><rect x=\"40\" y=\"80\" width=\"40\" height=\"184\" fill=\"url(#lg{ID})\"/><rect x=\"40\" y=\"80\" width=\"40\" height=\"184\" fill=\"{LIQ2}\" opacity=\"0.26\"/><circle cx=\"54.9\" cy=\"129.2\" r=\"2.2\" fill=\"#fff\" opacity=\"0.24\"/><circle cx=\"64.7\" cy=\"135.0\" r=\"2.2\" fill=\"#fff\" opacity=\"0.25\"/><circle cx=\"56.3\" cy=\"172.2\" r=\"2.2\" fill=\"#fff\" opacity=\"0.30\"/><circle cx=\"55.9\" cy=\"196.7\" r=\"1.8\" fill=\"#fff\" opacity=\"0.16\"/><circle cx=\"72.0\" cy=\"212.6\" r=\"2.1\" fill=\"#fff\" opacity=\"0.19\"/><circle cx=\"52.0\" cy=\"145.8\" r=\"2.1\" fill=\"#fff\" opacity=\"0.28\"/><circle cx=\"69.0\" cy=\"150.3\" r=\"1.3\" fill=\"#fff\" opacity=\"0.30\"/><circle cx=\"48.1\" cy=\"212.1\" r=\"1.6\" fill=\"#fff\" opacity=\"0.26\"/><circle cx=\"53.4\" cy=\"185.3\" r=\"0.8\" fill=\"#fff\" opacity=\"0.24\"/><circle cx=\"54.4\" cy=\"97.9\" r=\"1.5\" fill=\"#fff\" opacity=\"0.19\"/><path d=\"M52 90 Q52 66 60 64 Q68 66 68 90 Q68 96 60 96 Q52 96 52 90 Z\" fill=\"{FOAM}\"/><ellipse cx=\"60\" cy=\"80\" rx=\"18\" ry=\"7\" fill=\"{FOAM}\"/><ellipse cx=\"55\" cy=\"62\" rx=\"7\" ry=\"6\" fill=\"{FOAM}\"/><ellipse cx=\"65\" cy=\"60\" rx=\"6\" ry=\"5\" fill=\"{FOAM}\"/><ellipse cx=\"60\" cy=\"72\" rx=\"16\" ry=\"6\" fill=\"#fff\" opacity=\"0.4\"/></g><path d=\"M50 258 Q48 250 49 230 L45 150 Q43 110 52 90 L54 62 Q54 54 60 54 Q66 54 66 62 L68 90 Q77 110 75 150 L71 230 Q72 250 70 258 Q65 262 60 262 Q55 262 50 258 Z\" fill=\"#fff\" opacity=\"0.05\"/><path d=\"M50 258 Q48 250 49 230 L45 150 Q43 110 52 90 L54 62 Q54 54 60 54 Q66 54 66 62 L68 90 Q77 110 75 150 L71 230 Q72 250 70 258 Q65 262 60 262 Q55 262 50 258 Z\" fill=\"none\" stroke=\"#fff\" stroke-opacity=\"0.55\" stroke-width=\"2.5\" stroke-linejoin=\"round\"/><path d=\"M54 84 Q50 160 58 250\" stroke=\"#fff\" stroke-opacity=\"0.34\" stroke-width=\"3\" fill=\"none\" stroke-linecap=\"round\"/></svg>"
+};
+
+/* ---------- lista di riserva incorporata (YHOP, 22/10/2026) -------------- */
+var PIVO_SNAPSHOT=[
+ {
+  "tap": "1",
+  "id": 97127,
+  "name": "Nina ",
+  "brewery": "Brewfist",
+  "style": "Pils Gluten Free",
+  "abv": 4.5,
+  "glasses": [
+   {
+    "volume": 400,
+    "price": 5
+   },
+   {
+    "volume": 500,
+    "price": 6
+   }
+  ]
+ },
+ {
+  "tap": "2",
+  "id": 88044,
+  "name": "galaxie",
+  "brewery": "Brewfist",
+  "style": "Nelson Saison",
+  "abv": 5.5,
+  "glasses": [
+   {
+    "volume": 300,
+    "price": 5
+   },
+   {
+    "volume": 400,
+    "price": 6
+   },
+   {
+    "volume": 500,
+    "price": 7.5
+   }
+  ]
+ },
+ {
+  "tap": "3",
+  "id": 58210,
+  "name": "Spaceman",
+  "brewery": "Brewfist",
+  "style": "West Coast IPA",
+  "abv": 7,
+  "glasses": [
+   {
+    "volume": 300,
+    "price": 5.5
+   },
+   {
+    "volume": 400,
+    "price": 6.5
+   },
+   {
+    "volume": 500,
+    "price": 8
+   }
+  ]
+ },
+ {
+  "tap": "4",
+  "id": 97187,
+  "name": "Twelve anniversary",
+  "brewery": "Hop Skin",
+  "style": "American Porter",
+  "abv": 5.6,
+  "glasses": [
+   {
+    "volume": 300,
+    "price": 5.5
+   },
+   {
+    "volume": 400,
+    "price": 6.5
+   },
+   {
+    "volume": 500,
+    "price": 8
+   }
+  ]
+ },
+ {
+  "tap": "5",
+  "id": 95979,
+  "name": "KOHU",
+  "brewery": "Brewfist",
+  "style": "IPA - Hazy / New England",
+  "abv": 5.8,
+  "glasses": [
+   {
+    "volume": 300,
+    "price": 5.5
+   },
+   {
+    "volume": 400,
+    "price": 6.5
+   },
+   {
+    "volume": 500,
+    "price": 8
+   }
+  ]
+ },
+ {
+  "tap": "6",
+  "id": 76719,
+  "name": "O’ Zapft Is",
+  "brewery": "Hop Skin",
+  "style": "Marzen/Oktoberfest",
+  "abv": 5.8,
+  "glasses": [
+   {
+    "volume": 300,
+    "price": 5
+   },
+   {
+    "volume": 400,
+    "price": 6
+   },
+   {
+    "volume": 500,
+    "price": 7.5
+   }
+  ]
+ },
+ {
+  "tap": "7",
+  "id": 66158,
+  "name": "Zinnebir",
+  "brewery": "Brasserie de la Senne",
+  "style": "Belgian Blond Ale",
+  "abv": 5.8,
+  "glasses": [
+   {
+    "volume": 300,
+    "price": 5.5
+   },
+   {
+    "volume": 400,
+    "price": 6.5
+   },
+   {
+    "volume": 500,
+    "price": 8
+   }
+  ]
+ },
+ {
+  "tap": "8",
+  "id": 97128,
+  "name": "Gose che capitano",
+  "brewery": "Hop Skin",
+  "style": "Gose",
+  "abv": 4.2,
+  "glasses": [
+   {
+    "volume": 300,
+    "price": 5
+   },
+   {
+    "volume": 400,
+    "price": 6
+   },
+   {
+    "volume": 500,
+    "price": 7.5
+   }
+  ]
+ },
+ {
+  "tap": "9",
+  "id": 38203,
+  "name": "Guinness",
+  "brewery": "Guinness (Diageo)",
+  "style": "Stout",
+  "abv": 4.2,
+  "glasses": [
+   {
+    "volume": 250,
+    "price": 4.5
+   },
+   {
+    "volume": 500,
+    "price": 7
+   }
+  ]
+ },
+ {
+  "tap": "10",
+  "id": 58265,
+  "name": "La Leggenda Elijah",
+  "brewery": "Brewfist",
+  "style": "Imperial Stout",
+  "abv": 12,
+  "glasses": [
+   {
+    "volume": 330,
+    "price": 10
+   }
+  ]
+ }
+];
+
+/* ------------------------------------------------------------------------ */
+function norm(t){
+  return String(t==null?"":t).toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g,"")
+    .replace(/[^a-z0-9]+/g,"");
+}
+function clean(t){ return String(t==null?"":t).replace(/\s+/g," ").trim(); }
+function niceName(t){
+  t=clean(t);
+  if(t && t===t.toLowerCase()) t=t.replace(/(^|\s)(\S)/g,function(m,a,c){return a+c.toUpperCase();});
+  return t;
+}
+function niceStyle(t){ return clean(t).replace(/\s*\/\s*/g," / "); }
+function num(n){ if(n==null||String(n).trim()==="") return ""; var x=Number(String(n).replace(",",".")); if(!isFinite(x)||x<=0) return ""; return String(Math.round(x*100)/100); }
+function sizeLabel(ml){ var v=Number(ml); return isFinite(v)&&v>0 ? num(v/10)+" cl" : ""; }
+
+/* YHOP draft -> forma minima (quella salvata in cache / snapshot) */
+function slim(d){
+  return {
+    tap: clean(d.identifier), id: d.beer_id, name: d.name, brewery: d.brewery,
+    style: d.style, abv: d.abv,
+    glasses: (d.glasses||[]).map(function(g){return {volume:g.volume, price:g.price};})
+  };
+}
+function valid(list){
+  return Array.isArray(list) && list.length>0 && list.every(function(d){return d && d.tap && clean(d.name);});
+}
+
+var byKey={};
+var byName={};   /* schede preparate prima che la birra sia su YHOP: nome + birrificio "simile" */
+Object.keys(PIVO_BEERS).forEach(function(id){
+  var p=PIVO_BEERS[id];
+  (p.match||[]).forEach(function(k){ byKey[k]=id; });
+  (p.names||[]).forEach(function(n){ (byName[n]=byName[n]||[]).push(id); });
+});
+function byNameFor(d){
+  var c=byName[norm(d.name)], nb=norm(d.brewery);
+  if(!c) return null;
+  for(var i=0;i<c.length;i++){
+    var b=PIVO_BEERS[c[i]].brew||"";
+    if(!b || !nb || nb.indexOf(b)>=0 || b.indexOf(nb)>=0) return PIVO_BEERS[c[i]];
+  }
+  return null;
+}
+var AI={};
+var HEX=/^#[0-9A-Fa-f]{6}$/, DARK_ACC={"#F5263A":1,"#182124":1,"#5A3520":1};
+function mix(hex,w){ /* schiarisce un colore verso il bianco (riflesso del bicchiere) */
+  var n=parseInt(hex.slice(1),16), r=n>>16, g=(n>>8)&255, b=n&255;
+  function c(x){ return ("0"+Math.round(x+(255-x)*w).toString(16)).slice(-2); }
+  return "#"+c(r)+c(g)+c(b);
+}
+function validAI(a){
+  return a && typeof a.note==="string" && typeof a.noteEn==="string" && GLASS_TPL[a.glass] &&
+    HEX.test(a.liq) && HEX.test(a.foam) && HEX.test(a.acc) && Array.isArray(a.meters) && a.meters.length===3 &&
+    a.meters.every(function(m){return m>=1&&m<=5;}) && a.chip>=0 && a.chip<=7;
+}
+function aiProfile(a){
+  var acc=a.acc.toUpperCase(), dark=!!DARK_ACC[acc];
+  return {ai:true, acc:acc, ink:dark?"#FFFDF4":"#0B1012", note:a.note, noteEn:a.noteEn, meters:a.meters, chip:a.chip,
+    svg:fillTpl(a.glass,a.liq,mix(a.liq,.25),a.foam),
+    /* sul TV (fondo scuro) gli accenti scuri diventano miele, come nelle schede PIVO */
+    tv:{glass:a.glass, liq:a.liq, foam:a.foam, accent:(acc==="#182124"||acc==="#5A3520")?"#FFC24B":acc, key:a.key||"", keyEn:a.keyEn||""}};
+}
+function profileFor(d){
+  if(d.id!=null && PIVO_BEERS[String(d.id)]) return PIVO_BEERS[String(d.id)];
+  var k=byKey[norm(d.brewery)+"|"+norm(d.name)];
+  if(k) return PIVO_BEERS[k];
+  var pre=byNameFor(d); if(pre) return pre;
+  var a=d.id!=null ? AI[String(d.id)] : null;
+  return validAI(a) ? aiProfile(a) : null;
+}
+/* parole corte (ipa, apa, dipa, quad) solo come parola intera:
+   "New Zealand IPA" e "Cold IPA" non devono diventare "Double IPA" per via di "d ipa" */
+var WHOLE={ipa:1,apa:1,dipa:1,quad:1};
+function ruleFor(style){
+  var s=norm(style);
+  var w=" "+String(style==null?"":style).toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/[^a-z0-9]+/g," ").trim()+" ";
+  for(var i=0;i<PIVO_STYLE_RULES.length;i++){
+    var r=PIVO_STYLE_RULES[i];
+    if(!r.match.length) return r;
+    for(var j=0;j<r.match.length;j++){
+      var k=r.match[j];
+      if(WHOLE[k] ? w.indexOf(" "+k+" ")>=0 : s.indexOf(k)>=0) return r;
+    }
+  }
+  return PIVO_STYLE_RULES[PIVO_STYLE_RULES.length-1];
+}
+function fillTpl(key,liq,liq2,foam){
+  return (GLASS_TPL[key]||GLASS_TPL.tulip).split("{LIQ}").join(liq).split("{LIQ2}").join(liq2).split("{FOAM}").join(foam);
+}
+
+/* scheda + regola + dati YHOP -> birra pronta per menu e TV */
+function resolve(d){
+  var p=profileFor(d), r=p?null:ruleFor(d.style);
+  var prices=(d.glasses||[]).filter(function(g){return g && g.price!=null && isFinite(Number(g.price)) && sizeLabel(g.volume);})
+    .sort(function(a,b){return a.volume-b.volume;})
+    .map(function(g){return [sizeLabel(g.volume),"€"+num(g.price)];});
+  var src=p||r;
+  return {
+    tap: clean(d.tap), id: d.id,
+    name: p&&p.name ? p.name : niceName(d.name),
+    brew: clean(d.brewery),
+    style: p&&p.style ? p.style : niceStyle(d.style),
+    abv: num(d.abv),
+    prices: prices,
+    word: p&&p.word ? p.word : (ruleFor(d.style).word || niceStyle(d.style)),
+    acc: src.acc, ink: src.ink,
+    note: src.note, noteEn: src.noteEn,
+    meters: src.meters,
+    chip: src.chip,
+    ring: p&&p.ring ? p.ring : niceName(d.name),
+    svg: p ? p.svg : fillTpl(r.glass, r.liq, r.liq2, r.foam),
+    tv: p ? p.tv : {glass:r.tvGlass||r.glass, liq:r.tvLiq||r.liq, foam:r.tvFoam||r.foam, accent:r.tvAccent||r.acc, key:r.key, keyEn:r.keyEn||""},
+    auto: !p || !!p.ai,
+    source: !p ? "stile" : (p.ai ? "ai" : "pivo")
+  };
+}
+function resolveAll(list){
+  return list.slice().sort(function(a,b){
+    var x=parseFloat(a.tap), y=parseFloat(b.tap);
+    if(isFinite(x)&&isFinite(y)&&x!==y) return x-y;
+    return String(a.tap).localeCompare(String(b.tap));
+  }).map(resolve);
+}
+
+function readCache(){
+  try{ var c=JSON.parse(localStorage.getItem(CACHE_KEY)||"null"); if(c && valid(c.list)) return c; }catch(e){}
+  return null;
+}
+function writeCache(list){
+  try{ localStorage.setItem(CACHE_KEY,JSON.stringify({t:Date.now(),list:list})); }catch(e){}
+}
+
+function readAI(){
+  try{ var c=JSON.parse(localStorage.getItem(AI_KEY)||"null"); if(c && typeof c==="object") return c; }catch(e){}
+  return {};
+}
+var OFF=/[?&]yhop=off/.test(location.search);
+AI=readAI();
+var cached=OFF?null:readCache();
+var current=cached ? cached.list : PIVO_SNAPSHOT;
+var state={source: cached?"cache":"snapshot", at: cached?cached.t:null};
+
+function fetchLive(){
+  return new Promise(function(resolveP,reject){
+    if(OFF){ reject(new Error("yhop=off")); return; }
+    var ctl=("AbortController" in window)?new AbortController():null;
+    var to=setTimeout(function(){ if(ctl) ctl.abort(); reject(new Error("timeout")); },TIMEOUT_MS);
+    fetch(YHOP_URL,{cache:"no-store",signal:ctl?ctl.signal:undefined})
+      .then(function(r){ if(!r.ok) throw new Error("HTTP "+r.status); return r.json(); })
+      .then(function(j){
+        clearTimeout(to);
+        var list=(j && Array.isArray(j.drafts)) ? j.drafts.map(slim) : null;
+        if(!valid(list)) throw new Error("dati YHOP non validi");
+        resolveP(list);
+      })
+      .catch(function(e){ clearTimeout(to); reject(e); });
+  });
+}
+
+function fetchAI(){
+  if(!PROFILES_URL || OFF) return Promise.resolve(null);
+  return fetch(PROFILES_URL,{cache:"no-store"}).then(function(r){ if(!r.ok) throw new Error("HTTP "+r.status); return r.json(); })
+    .then(function(j){ if(!j || typeof j!=="object" || Array.isArray(j)) throw new Error("schede AI non valide"); return j; });
+}
+function rendered(){ return JSON.stringify(resolveAll(current)); }
+
+window.PIVO_LIVE={
+  /* lista da mostrare subito (cache o snapshot), già risolta */
+  initial: function(){ return resolveAll(current); },
+  /* legge YHOP; cb(lista risolta, cambiata?) solo se la lettura riesce */
+  /* cb(lista risolta, cambiata?) se almeno una lettura (YHOP o schede AI) riesce */
+  refresh: function(cb){
+    var before=rendered();
+    Promise.all([
+      fetchLive().catch(function(e){ state.error=String(e&&e.message||e); return null; }),
+      fetchAI().catch(function(e){ state.aiError=String(e&&e.message||e); return null; })
+    ]).then(function(r){
+      var list=r[0], ai=r[1];
+      if(list){ current=list; writeCache(list); state.source="yhop"; state.at=Date.now(); }
+      else if(window.console) console.info("[PIVO] YHOP non raggiungibile, uso "+state.source+":",state.error);
+      if(ai){ AI=ai; try{ localStorage.setItem(AI_KEY,JSON.stringify(ai)); }catch(e){} }
+      if(!list && !ai) return;
+      var res=resolveAll(current);
+      cb && cb(res, JSON.stringify(res)!==before);
+    });
+  },
+  state: function(){ return state; },
+  /* per la story del robot: una singola birra YHOP (formato grezzo) -> scheda pronta */
+  resolveDraft: function(d){ return resolve(slim(d)); },
+  setAI: function(obj){ if(obj && typeof obj==="object") AI=obj; }
+};
+})();
+</script>
+<script>
+/* PIVO STORY — animazione a tempo (deterministica): renderStory(draft, ai, flag, opts) costruisce la pagina,
+   storyFrame(t) disegna l'istante t (secondi). Durata STORY_DURATION. Nessuna animazione CSS:
+   ogni fotogramma si cattura uguale su qualsiasi computer. */
+(function(){
+"use strict";
+var DUR=8;
+var GL={
+ pilsner:{d:"M33 36 L48 258 Q49 268 59 268 L61 268 Q71 268 72 258 L87 36 Z", bottom:268, rim:[33,87], extra:""},
+ nonic:{d:"M31 36 L31 88 L25 104 L34 122 L45 258 Q46 268 56 268 L64 268 Q74 268 75 258 L86 122 L95 104 L89 88 L89 36 Z", bottom:268, rim:[31,89], extra:""},
+ tulip:{d:"M29 36 C25 98 37 134 55 152 L65 152 C83 134 95 98 91 36 Z", bottom:152, rim:[29,91],
+        extra:'<path d="M55 152 L55 236 M65 152 L65 236"/><path d="M33 264 Q60 240 87 264"/>'},
+ snifter:{d:"M25 58 C25 126 40 158 60 163 C80 158 95 126 95 58 C95 42 82 36 60 36 C38 36 25 42 25 58 Z", bottom:163, rim:[40,80],
+        extra:'<path d="M57 164 L57 232 M63 164 L63 232"/><path d="M34 262 Q60 238 86 262"/>'},
+ weizen:{d:"M35 36 L30 68 C30 102 46 118 46 150 L46 212 C46 242 36 250 34 266 L86 266 C84 250 74 242 74 212 L74 150 C74 118 90 102 90 68 L85 36 Z", bottom:266, rim:[35,85], extra:""}
+};
+var TOP=44;
+function clamp(x){ return x<0?0:x>1?1:x; }
+function seg(t,a,b){ return clamp((t-a)/(b-a)); }
+function eOut(x){ return 1-Math.pow(1-x,3); }
+function eBack(x){ var c=1.9; return 1+(c+1)*Math.pow(x-1,3)+c*Math.pow(x-1,2); }
+function esc(s){ return String(s==null?"":s).replace(/[&<>"]/g,function(c){ return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]; }); }
+function shade(hex,k){ var n=parseInt(hex.slice(1),16),r=n>>16,g=(n>>8)&255,b=n&255;
+  function c(v){ v=k<0?v*(1+k):v+(255-v)*k; return ("0"+Math.round(v).toString(16)).slice(-2); } return "#"+c(r)+c(g)+c(b); }
+var S=null;   /* stato della story corrente */
+
+/* bolle: posizioni fisse, generate da un seme (sempre uguali) */
+var BUB=[]; (function(){ var s=7; function r(){ s=(s*9301+49297)%233280; return s/233280; }
+  for(var i=0;i<16;i++) BUB.push({x:44+r()*32, sp:38+r()*46, ph:r(), rad:1.1+r()*1.6}); })();
+
+function glassFrame(t){
+  var g=S.g, p=eOut(seg(t,1.0,3.6));                         /* livello: 0 → pieno */
+  var surf=g.bottom-(g.bottom-TOP)*p;
+  var amp=0.6+3.2*(1-p)*Math.min(1,t);                         /* onde forti durante la spillatura */
+  var foamH=4+12*seg(t,1.2,3.4);
+  var pts=[], top=[];
+  for(var x=0;x<=120;x+=4){
+    var y=surf+amp*Math.sin(x*0.16+t*7.0)+amp*0.5*Math.sin(x*0.31-t*4.3);
+    pts.push(x+","+y.toFixed(2)); top.push([x,y]);
+  }
+  var liq='M0,'+(top[0][1])+' L'+pts.join(' L')+' L120,320 L0,320 Z';
+  var fm='M'+top.map(function(q){ return q[0]+","+(q[1]-foamH).toFixed(2); }).join(' L')+
+         ' L'+top.slice().reverse().map(function(q){ return q[0]+","+(q[1]+2).toFixed(2); }).join(' L')+' Z';
+  var caps="";
+  if(p>0.02) for(var i=0;i<top.length;i+=2){ var q=top[i];
+    caps+='<circle cx="'+q[0]+'" cy="'+(q[1]-foamH+1.5).toFixed(2)+'" r="'+(3.2+((i*7)%4)*0.6+0.5*Math.sin(t*3+i)).toFixed(2)+'"/>'; }
+  var bub="";
+  if(t>1.2) BUB.forEach(function(b){
+    var range=g.bottom-TOP, y=g.bottom-4-((t*b.sp+b.ph*range)%range), x=b.x+1.2*Math.sin(t*3+b.ph*9);
+    if(y>surf+3) bub+='<circle cx="'+x.toFixed(2)+'" cy="'+y.toFixed(2)+'" r="'+b.rad.toFixed(2)+'" fill="#fff" opacity=".55"/>';
+  });
+  /* cappello di schiuma sopra il bordo, quando il bicchiere è pieno */
+  var dome="", dp=eBack(seg(t,3.3,3.9)), br=1+0.04*Math.sin(t*2.4);
+  if(dp>0){ for(var x2=g.rim[0]+5, j=0; x2<=g.rim[1]-5; x2+=6, j++){
+      dome+='<circle cx="'+x2+'" cy="'+(37-(j%2)*1.6)+'" r="'+((5.4+(j*5%3)*0.7)*dp*br).toFixed(2)+'"/>'; } }
+  var shine=((t*0.55)%1.6)-0.3, sx=-30+shine*170;
+  S.svg.innerHTML=
+    '<defs><clipPath id="sgc"><path d="'+g.d+'"/></clipPath>'+
+    '<linearGradient id="sgd" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#fff" stop-opacity=".16"/><stop offset=".35" stop-color="#fff" stop-opacity="0"/>'+
+    '<stop offset=".72" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity=".32"/></linearGradient></defs>'+
+    '<g clip-path="url(#sgc)">'+
+      '<path d="'+liq+'" fill="'+S.liq+'"/><path d="'+liq+'" fill="url(#sgd)"/>'+bub+
+      (p>0.01?'<path d="'+fm+'" fill="'+S.foam+'"/><g fill="'+S.foam+'">'+caps+'</g>':'')+
+      '<polygon points="'+sx+',28 '+(sx+14)+',28 '+(sx+2)+',280 '+(sx-12)+',280" fill="#fff" opacity=".18"/>'+
+    '</g>'+
+    '<path d="'+g.d+'" fill="#fff" fill-opacity=".04" stroke="#FFFDF4" stroke-opacity=".8" stroke-width="3.2" stroke-linejoin="round"/>'+
+    '<g fill="none" stroke="#FFFDF4" stroke-opacity=".8" stroke-width="3.2" stroke-linecap="round">'+g.extra+'</g>'+
+    '<g fill="'+S.foam+'">'+dome+'</g>';
+}
+
+window.STORY_DURATION=DUR;
+window.renderStory=function(draft, ai, flag, opts){
+  opts=opts||{};
+  if(ai) window.PIVO_LIVE.setAI(ai);
+  var b=window.PIVO_LIVE.resolveDraft(draft), tv=b.tv;
+  var acc=tv.accent||b.acc, style=(b.style.length>22&&b.word)?b.word:b.style;
+  var prices=opts.noPrices?[]:(b.prices||[]);
+  var st=document.getElementById("st"); st.style.setProperty("--acc",acc);
+  st.innerHTML='<div class="glow"></div><div class="ring a"></div><div class="ring b"></div>'+
+    '<div class="top"><div class="word">PIVO</div><div class="sub"><i style="background:var(--red)"></i><i style="background:var(--honey)"></i><i style="background:var(--teal)"></i>ALLA SPINA · BERGAMO</div></div>'+
+    '<div class="flag">'+(opts.noTap||!b.tap?'':'<div class="no">'+esc(b.tap)+'</div>')+'<div class="pill">'+esc(flag||"NUOVA SPINA")+'</div></div>'+
+    '<div class="glass"><svg viewBox="18 22 84 256" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg"></svg></div>'+
+    '<div class="name"><span>'+esc(b.name)+'</span></div>'+
+    '<div class="meta"><div class="brew">'+esc(b.brew)+'</div>'+
+      '<div class="style">'+esc(style)+(b.abv?' · <b>'+esc(String(b.abv).replace(".",","))+'%</b>':'')+'</div>'+
+      (tv.key?'<div class="key">'+esc(tv.key)+'</div>':'')+'</div>'+
+    (prices.length?'<div class="prices">'+prices.map(function(p){ return '<div class="pr"><small>'+esc(p[0])+'</small><b>'+esc(p[1])+'</b></div>'; }).join("")+'</div>':'')+
+    '<div class="handle">@PIVOBIRRERIABERGAMO</div>';
+  /* nome: il più grande possibile su 2 righe senza spezzare parole */
+  var box=st.querySelector(".name"), sp=box.firstChild, size=200;
+  sp.style.fontSize=size+"px";
+  while(size>60 && (sp.offsetHeight>box.clientHeight || sp.scrollWidth>box.clientWidth+1)){ size-=4; sp.style.fontSize=size+"px"; }
+  var probe=document.createElement("span"); probe.style.cssText="position:absolute;visibility:hidden;white-space:nowrap;font-family:var(--disp);text-transform:uppercase";
+  st.appendChild(probe);
+  b.name.split(/\s+/).forEach(function(w){ probe.textContent=w; probe.style.fontSize=size+"px";
+    while(size>60 && probe.offsetWidth>box.clientWidth){ size-=4; probe.style.fontSize=size+"px"; } });
+  probe.remove(); sp.style.fontSize=size+"px";
+  S={g:GL[tv.glass]||GL.tulip, liq:tv.liq, foam:tv.foam, st:st, svg:st.querySelector(".glass svg"),
+     q:function(s){ return st.querySelector(s); }, qa:function(s){ return [].slice.call(st.querySelectorAll(s)); }};
+  window.storyFrame(DUR);
+  return {name:b.name, tap:b.tap, source:b.source};
+};
+function set(el,o,tx,ty,sc,rot){ if(!el) return; el.style.opacity=o;
+  el.style.transform='translate('+(tx||0)+'px,'+(ty||0)+'px) scale('+(sc==null?1:sc)+') rotate('+(rot||0)+'deg)'; }
+window.storyFrame=function(t){
+  if(!S) return;
+  var q=S.q;
+  set(q(".ring.a"),0.07,0,0,1,t*6); set(q(".ring.b"),0.07,0,0,1,-t*9);
+  var gl=seg(t,0.2,1.6); q(".glow").style.opacity=(eOut(gl)*(0.85+0.15*Math.sin(t*2.2))).toFixed(3);
+  var w=eOut(seg(t,0,0.7)); set(q(".word"),w,0,(1-w)*-40);
+  var jit=(t>0.55&&t<0.75)?6:0; q(".word").style.textShadow=(-6-jit)+'px 0 0 var(--teal),'+(6+jit)+'px 0 0 var(--red)';
+  var sb=eOut(seg(t,0.3,0.9)); set(q(".sub"),sb,0,(1-sb)*-16);
+  var no=seg(t,0.6,1.15); set(q(".flag .no"),Math.min(1,no*2),0,0,0.4+0.6*eBack(no));
+  /* NUOVA SPINA: entra con un rimbalzo, poi ogni 1,6 s fa un piccolo scatto */
+  var pp=seg(t,0.85,1.4), base=0.2+0.8*eBack(pp), k=((t-1.6)%1.6+1.6)%1.6, wig=t>1.6&&k<0.45?Math.sin(k/0.45*Math.PI*3)*(1-k/0.45):0;
+  set(q(".flag .pill"),Math.min(1,pp*2),0,0,base*(1+0.07*Math.abs(wig)),wig*5);
+  q(".flag .pill").style.boxShadow='0 0 '+(18+14*Math.abs(Math.sin(t*2.6)))+'px rgba(245,38,58,'+(0.35+0.25*Math.abs(Math.sin(t*2.6))).toFixed(2)+')';
+  var gi=eOut(seg(t,0.4,1.0)); set(q(".glass"),gi,0,(1-gi)*40,0.92+0.08*gi);
+  glassFrame(t);
+  var nm=eOut(seg(t,1.7,2.5)); set(q(".name"),nm,0,(1-nm)*70);
+  var parts=S.qa(".meta>div"); parts.forEach(function(el,i){ var e=eOut(seg(t,2.3+i*0.18,2.9+i*0.18)); set(el,e,0,(1-e)*24); });
+  S.qa(".pr").forEach(function(el,i){ var e=seg(t,3.0+i*0.18,3.5+i*0.18); set(el,Math.min(1,e*2),0,0,0.5+0.5*eBack(e)); });
+  var line=q(".prices"); if(line) line.style.borderTopColor='rgba(255,253,244,'+(0.22*eOut(seg(t,2.9,3.4))).toFixed(3)+')';
+  var hd=eOut(seg(t,3.6,4.2)); set(q(".handle"),hd*0.55,0,(1-hd)*14);
+};
+})();
+</script></body></html>
