@@ -1,15 +1,7 @@
 {
-  "updated": "2026-10-25T14:18:17.845Z",
+  "updated": "2026-10-25T20:43:07.813Z",
   "source": "ESPN",
   "list": [
-    {
-      "home": "Atalanta",
-      "away": "Frosinone",
-      "date": "2026-10-25",
-      "time": "15:00",
-      "competition": "Serie A",
-      "priority": true
-    },
     {
       "home": "Fiorentina",
       "away": "Atalanta",
