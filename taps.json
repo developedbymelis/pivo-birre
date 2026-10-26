@@ -24,12 +24,12 @@
     "prices": "30 cl €5,5 · 40 cl €6,5 · 50 cl €8"
   },
   "4": {
-    "id": 97187,
-    "name": "Twelve anniversary",
-    "brewery": "Hop Skin",
-    "style": "American Porter",
+    "id": 58221,
+    "name": "Jale",
+    "brewery": "Brewfist",
+    "style": "Extra Special Bitter",
     "abv": 5.6,
-    "prices": "30 cl €5,5 · 40 cl €6,5 · 50 cl €8"
+    "prices": "30 cl €5 · 40 cl €6 · 50 cl €7,5"
   },
   "5": {
     "id": 97229,
@@ -72,11 +72,11 @@
     "prices": "25 cl €4,5 · 50 cl €7"
   },
   "10": {
-    "id": 58265,
-    "name": "La Leggenda Elijah",
-    "brewery": "Brewfist",
-    "style": "Imperial Stout",
-    "abv": 12,
-    "prices": "33 cl €10"
+    "id": 96782,
+    "name": "Juicy Lucy",
+    "brewery": "Uiltje Brewing Co.",
+    "style": "NEIPA",
+    "abv": 5.5,
+    "prices": "33 cl €10 · 50 cl €7,5"
   }
 }
