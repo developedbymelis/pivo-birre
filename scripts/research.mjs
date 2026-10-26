@@ -182,6 +182,41 @@ export function diffTaps(before, after, lang = "tr", fresh = []) {
   return out;
 }
 
+const SQ = {
+  tr: (t, n) => `Musluk ${t} ${n}: fiyatlar düzeltildi, story yeniden hazırlandı.`,
+  it: (t, n) => `Spina ${t} ${n}: prezzi corretti, story rifatta.`,
+};
+async function storyQueue(drafts, tapsNow, cfg, log) {
+  const now = Date.now(), H48 = 48 * 3600e3;
+  let idx = await readJSON("stories.json", null);
+  const out = await readJSON("outbox.json", null);
+  const queued = new Set(((out && out.newTaps) || []).map(x => x.tap));
+  if (!idx) {                       // prima volta: le birre già in spina contano come fatte
+    idx = {};
+    for (const [t, b] of Object.entries(tapsNow)) idx[t] = { id: b.id, prices: b.prices, at: 0 };
+  }
+  const add = [], lines = [];
+  for (const [t, b] of Object.entries(tapsNow)) {
+    const s = idx[t], same = s && String(s.id) === String(b.id);
+    if (queued.has(t)) { idx[t] = { id: b.id, prices: b.prices, pending: true, tries: same && s.pending ? (s.tries || 0) + 1 : 1 }; continue; }
+    if (same && s.pending && (s.tries || 0) < 3) { add.push(t); s.tries = (s.tries || 0) + 1; log(`Story spina ${t}: nuovo tentativo`); }
+    else if (same && !s.pending && s.at && s.prices !== b.prices && now - s.at < H48) {
+      add.push(t); idx[t] = { id: b.id, prices: b.prices, pending: true, tries: 1 };
+      lines.push((SQ[cfg.notify_lang] || SQ.tr)(t, b.name)); log(`Story spina ${t}: prezzi cambiati, la rifaccio`);
+    }
+    else if (!s || !same) idx[t] = { id: b.id, prices: b.prices, at: 0 };   // cambio già gestito altrove
+  }
+  for (const t of Object.keys(idx)) if (!tapsNow[t]) delete idx[t];
+  if (add.length) {
+    const o = out || { lines: [], newTaps: [] };
+    o.lines = [...(o.lines || []), ...lines];
+    o.newTaps = [...(o.newTaps || []), ...add.map(t => ({ tap: t, draft: drafts.find(d => clean(d.identifier) === t) })).filter(x => x.draft)];
+    await writeJSON("outbox.json", o);
+  }
+  await writeJSON("stories.json", idx);
+  if (process.env.GITHUB_ACTIONS) spawnSync("git", ["add", "stories.json"], { cwd: DIR });
+}
+
 export async function run({ log = console.log } = {}) {
   const cfg = await readJSON("config.json", null);
   if (!cfg) throw new Error("config.json mancante");
@@ -215,6 +250,9 @@ export async function run({ log = console.log } = {}) {
       await writeJSON("outbox.json", { lines, newTaps });   // inviato da notify.mjs dopo story e salvataggio
     }
   }
+
+  // story: rifà quelle non riuscite e quelle con i prezzi corretti nelle prime 48 ore (stories.json = registro)
+  if (drafts.length) await storyQueue(drafts, tapsNow, cfg, log);
 
   const skip = new Set(cfg.skip_ids.map(String));
   const todo = drafts.filter(d => d && d.beer_id != null && clean(d.name))

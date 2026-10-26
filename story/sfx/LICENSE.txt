@@ -1,0 +1,9 @@
+Suoni usati nelle story (registrazioni vere, licenza Pixabay: uso libero anche commerciale):
+knock1-3.wav  "Knocking on Door" (freesound_community, Pixabay 6022) — tre colpi, resi più secchi
+sfx_clock.wav "Clock Ticking Down" (Dragon Studio, Pixabay 376897)
+sfx_ice.wav   "Ice Break" (tanweraman, Pixabay 445026)
+sfx_riser.wav "Cinematic Riser 03" (Dragon Studio, Pixabay 414575)
+sfx_heart.wav "Intense Cinematic Heartbeat" (lenspulse, Pixabay 584627)
+sfx_chicken.wav "Chicken Sound" (Wings_of_Freedom, Pixabay 402826)
+sfx_note1-4.wav "F Bass Note Guitar String" (freesound_community, Pixabay 77385) — quattro altezze
+Gli altri file (music_*, tick, swoosh, beat) non sono usati: MUSIC=false in story-anim.js.
