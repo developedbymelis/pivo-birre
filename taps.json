@@ -72,11 +72,11 @@
     "prices": "25 cl €4,5 · 50 cl €7"
   },
   "10": {
-    "id": 96782,
-    "name": "Juicy Lucy",
-    "brewery": "Uiltje Brewing Co.",
-    "style": "NEIPA",
-    "abv": 5.5,
-    "prices": "50 cl €7,5"
+    "id": 44014,
+    "name": "Punk Ipa",
+    "brewery": "BrewDog",
+    "style": "India Pale Ale (IPA)",
+    "abv": 5.6,
+    "prices": "44 cl €6,5"
   }
 }
