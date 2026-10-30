@@ -1,15 +1,7 @@
 {
-  "updated": "2026-10-29T19:23:39.173Z",
+  "updated": "2026-10-30T02:03:43.830Z",
   "source": "ESPN",
   "list": [
-    {
-      "home": "Fiorentina",
-      "away": "Atalanta",
-      "date": "2026-10-29",
-      "time": "20:45",
-      "competition": "Serie A",
-      "priority": true
-    },
     {
       "home": "Atalanta",
       "away": "Parma",
