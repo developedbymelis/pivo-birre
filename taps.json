@@ -72,11 +72,11 @@
     "prices": "25 cl €4,5 · 50 cl €7"
   },
   "10": {
-    "id": 44014,
-    "name": "Punk Ipa",
+    "id": 86732,
+    "name": "Black Heart",
     "brewery": "BrewDog",
-    "style": "India Pale Ale (IPA)",
-    "abv": 5.6,
+    "style": "Stout",
+    "abv": 4.1,
     "prices": "44 cl €6,5"
   }
 }
