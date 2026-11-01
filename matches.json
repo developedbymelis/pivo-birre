@@ -1,5 +1,5 @@
 {
-  "updated": "2026-10-31T22:30:27.248Z",
+  "updated": "2026-11-01T05:14:43.594Z",
   "source": "ESPN",
   "list": [
     {
@@ -15,6 +15,14 @@
       "away": "Atalanta",
       "date": "2026-11-08",
       "time": "15:00",
+      "competition": "Serie A",
+      "priority": true
+    },
+    {
+      "home": "Atalanta",
+      "away": "Inter Milan",
+      "date": "2026-11-22",
+      "time": "20:45",
       "competition": "Serie A",
       "priority": true
     }
