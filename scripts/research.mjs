@@ -254,6 +254,17 @@ export async function run({ log = console.log } = {}) {
   // story: rifà quelle non riuscite e quelle con i prezzi corretti nelle prime 48 ore (stories.json = registro)
   if (drafts.length) await storyQueue(drafts, tapsNow, cfg, log);
 
+  // da quando è alla spina ogni birra (per «appena spillata» nel menu)
+  if (drafts.length) {
+    const since = await readJSON("tapsince.json", {});
+    let ch = !Object.keys(since).length;
+    for (const [t, b] of Object.entries(tapsNow)) {
+      if (!since[t] || String(since[t].id) !== String(b.id)) { since[t] = { id: b.id, name: b.name, since: since[t] ? now.toISOString() : null }; ch = true; }
+    }
+    for (const t of Object.keys(since)) if (!tapsNow[t]) { delete since[t]; ch = true; }
+    if (ch) { await writeJSON("tapsince.json", since); if (process.env.GITHUB_ACTIONS) spawnSync("git", ["add", "tapsince.json"], { cwd: DIR }); }
+  }
+
   const skip = new Set(cfg.skip_ids.map(String));
   const todo = drafts.filter(d => d && d.beer_id != null && clean(d.name))
     .filter(d => !skip.has(String(d.beer_id)) && !profiles[String(d.beer_id)])
