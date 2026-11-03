@@ -1,15 +1,7 @@
 {
-  "updated": "2026-11-02T20:25:34.822Z",
+  "updated": "2026-11-03T02:40:19.119Z",
   "source": "ESPN",
   "list": [
-    {
-      "home": "Atalanta",
-      "away": "Parma",
-      "date": "2026-11-02",
-      "time": "20:45",
-      "competition": "Serie A",
-      "priority": true
-    },
     {
       "home": "Monza",
       "away": "Atalanta",
