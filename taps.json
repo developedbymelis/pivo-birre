@@ -40,12 +40,12 @@
     "prices": "30 cl €6 · 40 cl €7 · 50 cl €8"
   },
   "6": {
-    "id": 58256,
-    "name": "Il Montante",
-    "brewery": "Brewfist",
-    "style": "Doppelbock",
-    "abv": 7.3,
-    "prices": "30 cl €5,5 · 40 cl €6,5 · 50 cl €8"
+    "id": 41366,
+    "name": "Tradition Blanche Lambicus",
+    "brewery": "Brewery John Martin & Brewery Timmermans",
+    "style": "Blanche",
+    "abv": 4.5,
+    "prices": "30 cl €5 · 40 cl €6 · 50 cl €7,5"
   },
   "7": {
     "id": 66158,
