@@ -1,15 +1,7 @@
 {
-  "updated": "2026-11-08T12:06:19.586Z",
+  "updated": "2026-11-08T18:17:23.230Z",
   "source": "ESPN",
   "list": [
-    {
-      "home": "Monza",
-      "away": "Atalanta",
-      "date": "2026-11-08",
-      "time": "15:00",
-      "competition": "Serie A",
-      "priority": true
-    },
     {
       "home": "Atalanta",
       "away": "Inter Milan",
