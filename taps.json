@@ -72,11 +72,11 @@
     "prices": "25 cl €4,5 · 50 cl €7"
   },
   "10": {
-    "id": 76876,
-    "name": "Tuka",
-    "brewery": "Birra Dell'Eremo",
-    "style": "NEIPA",
-    "abv": 6.2,
-    "prices": "33 cl €6,5"
+    "id": 64422,
+    "name": "Geuze",
+    "brewery": "Brouwerij Boon",
+    "style": "Gueuze",
+    "abv": 6.5,
+    "prices": "25 cl €6 · 33 cl €6,5"
   }
 }
