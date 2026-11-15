@@ -1,50 +1,62 @@
 {
   "1": {
     "id": 33902,
-    "prices": "40 cl €5",
-    "at": 1794760245639,
-    "file": "stories/2026-11-15-1630-spina-1-bundes.mp4"
+    "prices": "40 cl €5 · 50 cl €7",
+    "at": 1794767547140,
+    "file": "stories/2026-11-15-1832-spina-1-bundes.mp4"
   },
   "2": {
     "id": 86509,
-    "prices": "40 cl €5",
-    "at": 1794760270170,
-    "file": "stories/2026-11-15-1630-spina-2-schauferla.mp4"
+    "prices": "30 cl €5 · 40 cl €6 · 50 cl €7,5",
+    "at": 1794767570532,
+    "file": "stories/2026-11-15-1832-spina-2-schauferla.mp4"
+  },
+  "3": {
+    "id": 97226,
+    "prices": "30 cl €6 · 40 cl €7 · 50 cl €8",
+    "at": 1794767498646,
+    "file": "stories/2026-11-15-1831-spina-3-arctic-terror-gluten-free.mp4"
   },
   "4": {
     "id": 74033,
-    "prices": "40 cl €5",
-    "at": 1794760318169,
-    "file": "stories/2026-11-15-1631-spina-4-silk-road.mp4"
+    "prices": "30 cl €6 · 40 cl €7 · 50 cl €8",
+    "at": 1794767594217,
+    "file": "stories/2026-11-15-1832-spina-4-silk-road.mp4"
   },
   "5": {
     "id": 78192,
-    "prices": "40 cl €5",
-    "at": 1794760342234,
-    "file": "stories/2026-11-15-1631-spina-5-big-double.mp4"
+    "prices": "30 cl €6 · 40 cl €7 · 50 cl €8",
+    "at": 1794767617716,
+    "file": "stories/2026-11-15-1833-spina-5-big-double.mp4"
   },
   "6": {
     "id": 33884,
-    "prices": "40 cl €5",
-    "at": 1794760366335,
-    "file": "stories/2026-11-15-1632-spina-6-wave-runner.mp4"
+    "prices": "30 cl €6 · 40 cl €7 · 50 cl €8",
+    "at": 1794767641203,
+    "file": "stories/2026-11-15-1833-spina-6-wave-runner.mp4"
   },
   "7": {
     "id": 76455,
-    "prices": "40 cl €5",
-    "at": 1794760389755,
-    "file": "stories/2026-11-15-1632-spina-7-doble.mp4"
+    "prices": "30 cl €6 · 40 cl €7 · 50 cl €8",
+    "at": 1794767664105,
+    "file": "stories/2026-11-15-1834-spina-7-doble.mp4"
   },
   "8": {
     "id": 97312,
-    "prices": "40 cl €5",
-    "at": 1794760413715,
-    "file": "stories/2026-11-15-1633-spina-8-pickled-eggs.mp4"
+    "prices": "30 cl €5 · 40 cl €6 · 50 cl €7,5",
+    "at": 1794767687898,
+    "file": "stories/2026-11-15-1834-spina-8-pickled-eggs.mp4"
   },
   "9": {
     "id": 38203,
     "prices": "25 cl €4,5 · 50 cl €7",
     "at": 1793899372834,
     "file": "stories/2026-11-05-1722-spina-9-guinness.mp4"
+  },
+  "10": {
+    "id": 97369,
+    "prices": "44 cl €8",
+    "at": 1794767523512,
+    "file": "stories/2026-11-15-1831-spina-10-this-is-rhapzody.mp4"
   }
 }
