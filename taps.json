@@ -5,7 +5,7 @@
     "brewery": "Hammer",
     "style": "Pilsner",
     "abv": 5.2,
-    "prices": "40 cl €5 · 50 cl €6"
+    "prices": "40 cl €5"
   },
   "2": {
     "id": 86509,
@@ -13,7 +13,7 @@
     "brewery": "Alder Beer Co.",
     "style": "Märzen",
     "abv": 5.6,
-    "prices": "30 cl €5 · 40 cl €6 · 50 cl €7,5"
+    "prices": "40 cl €5"
   },
   "3": {
     "id": 74184,
@@ -21,7 +21,7 @@
     "brewery": "Alder Beer Co.",
     "style": "American IPA",
     "abv": 6.8,
-    "prices": "30 cl €6 · 40 cl €7 · 50 cl €8"
+    "prices": "40 cl €5"
   },
   "4": {
     "id": 74033,
@@ -29,7 +29,7 @@
     "brewery": "Hop Skin",
     "style": "NEIPA",
     "abv": 6.4,
-    "prices": "30 cl €6 · 40 cl €7 · 50 cl €8"
+    "prices": "40 cl €5"
   },
   "5": {
     "id": 78192,
@@ -37,7 +37,7 @@
     "brewery": "Hop Skin",
     "style": "Double NEIPA",
     "abv": 8.4,
-    "prices": "30 cl €6 · 40 cl €7 · 50 cl €8"
+    "prices": "40 cl €5"
   },
   "6": {
     "id": 33884,
@@ -45,7 +45,7 @@
     "brewery": "Hammer",
     "style": "American IPA",
     "abv": 6.5,
-    "prices": "30 cl €6 · 40 cl €7 · 50 cl €8"
+    "prices": "40 cl €5"
   },
   "7": {
     "id": 76455,
@@ -53,7 +53,7 @@
     "brewery": "Hammer",
     "style": "Doppelbock",
     "abv": 7.5,
-    "prices": "30 cl €6 · 40 cl €7 · 50 cl €8"
+    "prices": "40 cl €5"
   },
   "8": {
     "id": 97312,
@@ -61,7 +61,7 @@
     "brewery": "Alder Beer Co.",
     "style": "Golden Ale",
     "abv": 4.6,
-    "prices": "30 cl €5 · 40 cl €6 · 50 cl €7,5"
+    "prices": "40 cl €5"
   },
   "9": {
     "id": 38203,
@@ -70,13 +70,5 @@
     "style": "Stout",
     "abv": 4.2,
     "prices": "25 cl €4,5 · 50 cl €7"
-  },
-  "10": {
-    "id": 97369,
-    "name": "This is Rhapzody",
-    "brewery": "Alder Beer Co.",
-    "style": "New Zealand Hazy IPA",
-    "abv": 6,
-    "prices": "44 cl €8"
   }
 }

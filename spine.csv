@@ -1,11 +1,10 @@
 SPINA,BIRRA,BIRRIFICIO,STILE,ABV,PREZZI (da YHOP)
-1,Bundes,Hammer,Pilsner,"5,2%",40 cl €5 · 50 cl €6
-2,Schäuferla,Alder Beer Co.,Märzen,"5,6%","30 cl €5 · 40 cl €6 · 50 cl €7,5"
-3,Rockfield,Alder Beer Co.,American IPA,"6,8%",30 cl €6 · 40 cl €7 · 50 cl €8
-4,Silk Road,Hop Skin,NEIPA,"6,4%",30 cl €6 · 40 cl €7 · 50 cl €8
-5,Big Double,Hop Skin,Double NEIPA,"8,4%",30 cl €6 · 40 cl €7 · 50 cl €8
-6,Wave Runner,Hammer,American IPA,"6,5%",30 cl €6 · 40 cl €7 · 50 cl €8
-7,Doble,Hammer,Doppelbock,"7,5%",30 cl €6 · 40 cl €7 · 50 cl €8
-8,Pickled Eggs,Alder Beer Co.,Golden Ale,"4,6%","30 cl €5 · 40 cl €6 · 50 cl €7,5"
+1,Bundes,Hammer,Pilsner,"5,2%",40 cl €5
+2,Schäuferla,Alder Beer Co.,Märzen,"5,6%",40 cl €5
+3,Rockfield,Alder Beer Co.,American IPA,"6,8%",40 cl €5
+4,Silk Road,Hop Skin,NEIPA,"6,4%",40 cl €5
+5,Big Double,Hop Skin,Double NEIPA,"8,4%",40 cl €5
+6,Wave Runner,Hammer,American IPA,"6,5%",40 cl €5
+7,Doble,Hammer,Doppelbock,"7,5%",40 cl €5
+8,Pickled Eggs,Alder Beer Co.,Golden Ale,"4,6%",40 cl €5
 9,Guinness,Guinness (Diageo),Stout,"4,2%","25 cl €4,5 · 50 cl €7"
-10,This is Rhapzody,Alder Beer Co.,New Zealand Hazy IPA,"6,0%",44 cl €8
