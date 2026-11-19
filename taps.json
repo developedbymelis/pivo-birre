@@ -5,7 +5,7 @@
     "brewery": "Hammer",
     "style": "Pilsner",
     "abv": 5.2,
-    "prices": "40 cl €5 · 50 cl €7"
+    "prices": "40 cl €5 · 50 cl €6"
   },
   "2": {
     "id": 86509,
@@ -32,11 +32,11 @@
     "prices": "30 cl €6 · 40 cl €7 · 50 cl €8"
   },
   "5": {
-    "id": 58217,
-    "name": "2Late",
-    "brewery": "Brewfist",
-    "style": "Imperial IPA",
-    "abv": 8.5,
+    "id": 33883,
+    "name": "Killer Queen",
+    "brewery": "Hammer",
+    "style": "Double IPA",
+    "abv": 8,
     "prices": "30 cl €6 · 40 cl €7 · 50 cl €8"
   },
   "6": {
