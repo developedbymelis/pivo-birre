@@ -45,12 +45,17 @@ jobs:
           which ffmpeg || (sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg)
           node scripts/story.mjs
 
+      - name: Copia della tabella (per i telefoni che non raggiungono Google)
+        if: always()
+        run: |
+          curl -fsSL "https://docs.google.com/spreadsheets/d/e/2PACX-1vQr4258tGu1AE9TPCTWxqRdapqCUg8FxVXi8JLKKqy8BDyZLm1jY7Hb8NQbLFWzNBLTaADaSFF_6Bck/pub?gid=838442448&single=true&output=csv" -o sheet.tmp && grep -q "TIPO" sheet.tmp && mv sheet.tmp sheet.csv || echo "Tabella non scaricata, resta la copia precedente."
+
       - name: Salva le novità
         if: always()
         run: |
           git config user.name "pivo-robot"
           git config user.email "pivo-robot@users.noreply.github.com"
-          for f in profiles.json status.json taps.json matches.json stories; do if [ -e "$f" ]; then git add "$f"; fi; done
+          for f in profiles.json status.json taps.json matches.json sheet.csv stories; do if [ -e "$f" ]; then git add "$f"; fi; done
           if git diff --cached --quiet; then echo "Nessuna novità."; exit 0; fi
           git commit -m "PIVO: aggiornamento automatico"
           git push
