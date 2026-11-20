@@ -8,12 +8,12 @@
     "prices": "40 cl €5 · 50 cl €6"
   },
   "2": {
-    "id": 86509,
-    "name": "Schäuferla",
-    "brewery": "Alder Beer Co.",
-    "style": "Märzen",
-    "abv": 5.6,
-    "prices": "30 cl €5 · 40 cl €6 · 50 cl €7,5"
+    "id": 50309,
+    "name": "Aventinus",
+    "brewery": "Schneider Weisse",
+    "style": "Bock - Weizenbock",
+    "abv": 8.2,
+    "prices": "30 cl €5,5 · 40 cl €6,5 · 50 cl €8"
   },
   "3": {
     "id": 97226,
@@ -56,11 +56,11 @@
     "prices": "30 cl €6 · 40 cl €7 · 50 cl €8"
   },
   "8": {
-    "id": 97312,
-    "name": "Pickled Eggs",
-    "brewery": "Alder Beer Co.",
-    "style": "Golden Ale",
-    "abv": 4.6,
+    "id": 96366,
+    "name": "Ama bianca",
+    "brewery": "Birrificio Amarcord",
+    "style": "Blanche",
+    "abv": 4.9,
     "prices": "30 cl €5 · 40 cl €6 · 50 cl €7,5"
   },
   "9": {
