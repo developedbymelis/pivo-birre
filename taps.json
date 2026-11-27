@@ -1,11 +1,11 @@
 {
   "1": {
-    "id": 62141,
-    "name": "Pilsner Urquell",
-    "brewery": "Plzenský Prazdroj (Asahi)",
-    "style": "Pilsner",
-    "abv": 4.4,
-    "prices": "40 cl €5 · 50 cl €6"
+    "id": 77184,
+    "name": "Sold Out",
+    "brewery": "Hop Skin",
+    "style": "German Pils",
+    "abv": 5.2,
+    "prices": "30 cl €5 · 50 cl €6"
   },
   "2": {
     "id": 50309,
@@ -48,12 +48,12 @@
     "prices": "30 cl €5,5 · 40 cl €6,5 · 50 cl €8"
   },
   "7": {
-    "id": 76455,
-    "name": "Doble",
-    "brewery": "Hammer",
-    "style": "Doppelbock",
-    "abv": 7.5,
-    "prices": "30 cl €6 · 40 cl €7 · 50 cl €8"
+    "id": 66158,
+    "name": "Zinnebir",
+    "brewery": "Brasserie de la Senne",
+    "style": "Belgian Blond Ale",
+    "abv": 5.8,
+    "prices": "30 cl €5,5 · 40 cl €6,5 · 50 cl €8"
   },
   "8": {
     "id": 96366,
